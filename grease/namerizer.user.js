@@ -42,6 +42,18 @@ if (!this.GM_getValue || (this.GM_getValue.toString && this.GM_getValue.toString
   };
 }
 
+function updateRelationship() {
+	GM_xmlhttpRequest({
+		method: "GET",
+		url: baseServiceAddress + "/fetch/" + userId,
+		onload: function(response) {
+			// TODO, roim, maybe onload means status == 200?
+			if (response.status != 200) return;
+			updateCache(response.responseText);
+		}
+	});
+}
+
 var nicknameList;
 function updateCache (jsonContent) {
 	// Memory
@@ -71,19 +83,8 @@ if (persistentJson != failCode) {
 	updateMemoryCache(persistentJson);
 }
 
-GM_xmlhttpRequest({
-  method: "GET",
-  // If the persistent request failed, there's nothing to do before the API returns
-  synchronous: (persistentJson == failCode),
-  url: baseServiceAddress + "/fetch/" + userId,
-  onload: function(response) {
-    // TODO, roim, maybe onload means status == 200?
-    if (response.status != 200) return;
-
-    updateCache(response.responseText);
-  }
-});
-
+// This seems totally stupid, but it totally works. And don't ever touch it.
+setTimeout(function() { updateRelationship(); }, 0);
 
 // AQUI COMEÇA A INTERFACE
 
