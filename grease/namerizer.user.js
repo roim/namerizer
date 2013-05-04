@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name Namerizer Grasemonkey Script
 // @namespace http://www.webmonkey.com
-
 // @description Namerizer renames the names of your named friends.
-
+// @include *
+//
 // @match *://www.facebook.com/*
-
+//
 // @grant GM_xmlhttpRequest
 // @grant GM_getValue
 // @grant GM_setValue
@@ -25,6 +25,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
 var cacheKey = "namerizerCache";
 var failCode = "fail";
 var baseServiceAddress = "http://namerizer.herokuapp.com";
+var idNotFound = 123321123;
 
 //
 // Function definitions
@@ -67,10 +68,37 @@ function updateCache (jsonContent) {
 
 function updateMemoryCache (jsonContent) {
 	nicknameList = JSON.parse(jsonContent);
+
+	for (var i in nicknameList) {
+		nicknameList[i].username = decodeFromHex(nicknameList[i].username);
+		nicknameList[i].name = decodeFromHex(nicknameList[i].name);
+		nicknameList[i].alias = decodeFromHex(nicknameList[i].alias);
+	};
 }
 
-// TODO, lag, set the user ID
-var userId = 42;
+function decodeFromHex(str){
+    var r="";
+    var e=str.length;
+    var s;
+    while(e>=0){
+        s=e-3;
+        r=String.fromCharCode("0x"+str.substring(s,e))+r;
+        e=s;
+    }
+    return r.replace(String.fromCharCode(0), "");
+}
+
+var userId = idNotFound;
+
+var beginOfHtml = $("html").html().substring(0, 300);
+
+if (beginOfHtml[7] == 'm') {
+	var begin = beginOfHtml.indexOf("user") + 7;
+	var end = beginOfHtml.indexOf('",');
+
+	var userIdString = beginOfHtml.substring(begin, end);
+	userId = parseInt(userIdString);
+}
 
 //
 // Initialization
@@ -89,9 +117,8 @@ if (persistentJson != failCode) {
 // This seems totally stupid, but it totally works. And don't ever touch it.
 setTimeout(function() { updateRelationship(); }, 0);
 
-// AQUI COMEÇA A INTERFACE
 
-var nicknameList2 = [{username : 'rodrigo.roim', name : 'Rodrigo Roim', alias : 'Roim'}, {username : 'valeria.soares.353', name : 'Valeria Soares', alias : 'Mãe'}, {username : 'bernardo.rufino', name : 'Bernardo Rufino', alias : 'Rufas'}, {username : 'marcioapaiva', name : 'Marcio Paiva', alias : 'Moco'}];
+// Front front end
 
 function search(list, property, value) {
 	for (var i in list) {
@@ -118,7 +145,7 @@ function configureNodeAnimation(node, target) {
 }
 
 function replaceName(node, username) {
-	var target = search(nicknameList2, 'username', username);
+	var target = search(nicknameList, 'username', username);
 	if (target && node.textContent && 
 			(!node.childNodes || node.childNodes.length == 1)
 			&& $(node).attr('namerized') != 'true' 
