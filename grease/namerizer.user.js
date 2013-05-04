@@ -2,7 +2,6 @@
 // @name Namerizer Grasemonkey Script
 // @namespace http://www.webmonkey.com
 // @description Namerizer renames the names of your named friends.
-// @include *
 //
 // @match *://www.facebook.com/*
 //
