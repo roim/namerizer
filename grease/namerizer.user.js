@@ -249,8 +249,8 @@ function updateCommonNicknames(response) {
 		commonNicks = "-";
 	}
 	else {
-		commonNicks = decodeFromHex(array[0][0]);
-		for (var i = 1; i < array.length; i++) {
+		commonNicks = decodeFromHex(array[array.length - 1][0]);
+		for (var i = array.length - 2; i >= 0; i--) {
 			commonNicks += ', ' + decodeFromHex(array[i][0]);
 		}
 	}
