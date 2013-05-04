@@ -1,0 +1,22 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head><title>Namerizer App</title></head>
+    <div id="chatbox">
+        {% if latest_messages %}
+        <ul>
+        {% for mess in latest_messages %}
+            <li><b>{{ mess.pub_date }}</b>{{ mess.source }}</li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        <p>No messages are available.</p>
+        {% endif %}
+    </div>
+    <br>
+    <br>
+    <textarea></textarea>
+
+<script type="text/javascript" src="{% static "jquery.min.js" %}"></script>
+
+</html>
