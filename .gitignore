@@ -6,6 +6,7 @@
 *.exe
 *.o
 *.so
+*.pyc
 
 # Packages #
 ############
@@ -44,3 +45,4 @@ Thumbs.db
 .classpath
 *.eml
 *.userlibraries
+*.pyc
