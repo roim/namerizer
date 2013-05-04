@@ -57,6 +57,20 @@ function updateRelationship() {
 	});
 }
 
+function fetchCommonNicknames() {
+	GM_xmlhttpRequest({
+		method: "GET",
+		url: baseServiceAddress + "/fetch/suggestions/" + findProfileOwner() + '/3',
+		onload: function(response) {
+			console.debug(':D');
+			console.debug(response);
+			// TODO, roim, maybe onload means status == 200?
+			if (response.status != 200) return;
+			updateCommonNicknames(response.responseText);
+		}
+	});
+}
+
 var nicknameList = {};
 function updateCache (jsonContent) {
 	// Memory
@@ -156,20 +170,92 @@ function replaceName(node, username) {
 	}
 }
 
+function usernameFromURL(url) {
+	if (url.indexOf('?') != -1) {
+		return url.substring(url.indexOf('www.facebook.com/') + 17, url.indexOf('?'));
+	} else {
+		return url.substring(url.indexOf('www.facebook.com/') + 17);
+	}
+}
+
+
 function switchNames() {
 	var links = $('a');
-	for (var i in links) {
+	for (var i = 0; i < links.length; i++) {
 		var href = links[i].href;
 		if (!href) {
 		  continue;
 		}
-		if (href.indexOf('?') != -1) {
-			username = href.substring(href.indexOf('www.facebook.com/') + 17, href.indexOf('?'));
-		} else {
-			username = href.substring(href.indexOf('www.facebook.com/') + 17);
-		}
-		replaceName(links[i], username);
+		replaceName(links[i], usernameFromURL(href));
 	}
 }
 
+function findProfileOwner() {
+	var columns = $('#pagelet_timeline_main_column');
+	for (var i = 0; i < columns.length; i++) {
+		var datagt = $(columns[i]).attr('data-gt');
+		if (datagt) {
+			datagt = JSON.parse(datagt);
+			if (datagt['profile_owner']) {
+				return datagt['profile_owner'];
+			}
+		}
+	}
+}
+
+var commonNicknamesAnchor, commonNicknames;
+function createCommonNicknames() {
+	var aboutContent;
+	var contents = $('.timelineReportContent .timelineUnitContainer');
+	for (i = 0; i < contents.length; i++) {
+		var datagt = $(contents[i]).attr('data-gt');
+		if (datagt) {
+			datagt = JSON.parse(datagt);
+			if (datagt['timeline_unit_type'] == 'TimelineAboutUnit') {
+				aboutContent = contents[i];
+				break;
+			}
+		}
+	}
+	if (!aboutContent) {
+		return;
+	} else if ($(aboutContent).attr('namerized')) {
+		if (commonNicknamesAnchor.text() == '-') {
+			var target = search(nicknameList, 'username', usernameFromURL(window.location.href));
+			if (target) {
+				fadeTextTo(commonNicknamesAnchor, target.alias);
+			} else {
+				fadeTextTo(commonNicknamesAnchor, '-');
+			}
+		}
+		return;
+	}
+	$(aboutContent).attr('namerized', 'true');
+	var info = $($(aboutContent).find('ul')[0]);
+	var elm = $('<li id="namerizer_nicknames" class="_4_uf"/>').appendTo($('<div class="clearfix" />').appendTo(info));
+	elm.append('<img class="_s0 _51iw _29h _29i _54rv img" width="16" height="16" alt="" src="https://fbstatic-a.akamaihd.net/rsrc.php/v2/yI/r/jg7lQrpjdKk.png"/>');
+	commonNicknamesAnchor = $('<a target="_blank" class="profileLink" href="http://namerizer.herokuapp.com/" />').appendTo(
+		$('<li class="_4_ug"/>').appendTo($('<ul class="uiList _4_vp _29j _29k _513w _4kg"/>').appendTo(elm)).text('Common nicknames: ')
+	).text('-');
+	
+	setTimeout(fetchCommonNicknames, 0);
+}
+
+function updateCommonNicknames(response) {
+	console.debug(response);
+	var array = JSON.parse(response);
+	var commonNicks;
+	if (array.length == 0) {
+		commonNicks = "-";
+	}
+	else {
+		commonNicks = decodeFromHex(array[0][0]);
+		for (var i = 1; i < array.length; i++) {
+			commonNicks += ', ' + decodeFromHex(array[i][0]);
+		}
+	}
+	fadeTextTo(commonNicknamesAnchor, commonNicks);
+}
+
 setInterval(switchNames, 100);
+setInterval(createCommonNicknames, 1000);
