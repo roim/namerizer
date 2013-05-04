@@ -118,7 +118,8 @@ function replaceName(node, username) {
 	var target = search(nicknameList2, 'username', username);
 	if (target && node.textContent && 
 			(!node.childNodes || node.childNodes.length == 1)
-			&& $(node).attr('namerized') != 'true') {
+			&& $(node).attr('namerized') != 'true' 
+			&& $(node).text() == target.name) {
 		$(node).attr('namerized', 'true');
 		
 		fadeTextTo(node, target.alias);
