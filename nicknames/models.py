@@ -2,7 +2,8 @@ from django.db import models
 
 # Create your models here.
 class Nickname(models.Model):
-    source = models.IntegerField()
-    target = models.IntegerField()
+    source = models.BigIntegerField()
+    target = models.BigIntegerField()
     alias = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    name = models.CharField(max_length=200)
+    username = models.CharField(max_length=200)

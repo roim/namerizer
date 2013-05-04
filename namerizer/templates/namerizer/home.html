@@ -2,35 +2,85 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+      .pointer{
+        cursor: pointer;
+      }
+
+  </style>
+
   <meta charset="utf-8" />
-  <link rel="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+  <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
   <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-  <script type="text/javascript" src="{% static '/jquery.min.js' %}"></script>
 </head>
 <body>
-<div id="fb-root"></div>
-
-
-
-<div class="ui-widget">
-  <label for="tags" class="label">Search: </label>
-  <input id="tags" onKeyPress="clickFriend()"/>
-</div>
-<table id='friendsBoard' hidden="true">
-  <td>
-    <div id="photoContainer">
+  <div id="fb-root"></div>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="brand pointer" onclick="return home();">Namerizer</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li id="homeButton" class="active"><a class="pointer" onclick="return home();">Home</a></li>
+            <li id="aboutButton"><a class="pointer" onclick="return about();">About</a></li>
+            <li id="contactButton"><a class="pointer" onclick="return contact();">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
     </div>
-  </td>
-  <td id="nameContainer">
-  </td>
-  <td>
-    <input id="nicknameInput" onKeyPress="sendNickname()"/>
-  </td>
-</table>
+  </div>
 
-</div>
+  <div class="container">
+    <div id="home">
+      <h1>Search</h1>
+      <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
+      <div class="ui-widget">
+        <label for="tags" class="label">Search: </label>
+        <input id="tags" onKeyPress="clickFriend()"/>
+      </div>
+      <table id='friendsBoard' hidden="true">
+        <td>
+          <div id="photoContainer">
+          </div>
+        </td>
+        <td id="nameContainer">
+        </td>
+        <td>
+          <input id="nicknameInput" onKeyPress="sendNickname()"/>
+        </td>
+      </table>
+    </div>
+    <div id="about" hidden="true">
+      <h1>About</h1>
+      <p>Texto</p>
+    </div>
+    <div id="contact" hidden="true">
+      <h1>Contact</h1>
+      <p>  
+        <table>
+          <td><tl>Eric Gomes Muxagata</tl> <tl><a href="mailto:ericgmconrado@gmail.com">ericgmconrado@gmail.com</a></tl></td>
+          <td><tl>Luiz Filipe Martins Ramos</tl><tl> <a href="mailto:luizmramos@gmail.com">luizmramos@gmail.com</a></tl> </td>
+          <td><tl>Rodrigo Roim Ferreira</tl><tl> <a href="mailto:rodrigu.rf@gmail.com">rodrigu.rf@gmail.com</a></tl></td>
+          <td><tl>Victor Gonçalves Elias</tl><tl><a href="mailto:victorgelias@gmail.com"> victorgelias@gmail.com</a></tl></td>
+        </table>
+      </p>
+    </div>
+    <!--Below we include the Login Button social plugin. This button uses the JavaScript SDK to-->
+    <!--present a graphical Login button that triggers the FB.login() function when clicked.-->
+    <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+  </div> <!-- /container -->
+
+
 <script type="text/javascript">
 
   
@@ -87,23 +137,28 @@
 
 
   var availableTags = [];
+  var usernames = [];
   var ids=new Array('');
   var selectedId=0;
+  var selectedName;
+  var selectedUsername;
   var myId;
+  var myName;
+  var myUserName;
 
 
 
   function FindFriendlist(){
   var aux = new Array();
-  FB.api("/me/friends",function(response){
+  FB.api("/me/friends?fields=username,name,id",function(response){
     
     var k=0;
     for(var i in response.data){
       availableTags.push(response.data[i].name);
+      usernames.push(response.data[i].username);
       ids[k]=response.data[i].id;
       k=k+1;
     }
-    console.log(availableTags);
     $(function() {
         $( "#tags" ).autocomplete({
             source: availableTags
@@ -114,6 +169,8 @@
   });
   FB.api("/me",function(response){
     myId=response.id;
+    myName=response.name;
+    myUserName=response.username;
   });
   
 }
@@ -136,6 +193,8 @@ function selectFriend(){
     for(var nome in availableTags){
         if(availableTags[nome]==$('#tags').val()){
           selectedId=ids[nome];
+          selectedName=availableTags[nome];
+          selectedUsername=usernames[nome];
           nomeSelected = availableTags[nome];
           FB.api(selectedId+ "/picture",function(response){
               $('#photoContainer').html('<img src=\"' + response.data.url  + '\"  \/>');
@@ -165,29 +224,82 @@ function isEnter(){
 }
 
 function clickFriend(){
-  if(isEnter()){
+  if(isEnter() && belongs(availableTags,$('#tags').val())){
     selectFriend();
   }
 }
 
+function encodeToHex(str){
+    var r="";
+    var e=str.length;
+    var c=0;
+    var h;
+    while(c<e){
+        h=str.charCodeAt(c++).toString(16);
+        while(h.length<3) h="0"+h;
+        r+=h;
+    }
+    return r;
+}
+function decodeFromHex(str){
+    var r="";
+    var e=str.length;
+    var s;
+    while(e>=0){
+        s=e-3;
+        r=String.fromCharCode("0x"+str.substring(s,e))+r;
+        e=s;
+    }
+    return r;
+}
+
+
 function sendNickname(){
  
   if(isEnter()){
+    alert(selectedId + selectedUsername + selectedName + myId + myUserName + myName);
     $.get(
-      "http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + selectedId + "/" + $('#nicknameInput').val() ,
+      "http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + selectedId + "/" + $('#nicknameInput').val() +'/'+  encodeToHex(selectedName) + '/' + encodeToHex(selectedUsername),
       {},
       function(data) {
-         alert('page content: ' + data);
+         console.log("status: success");
       }
     );
   }
 }
 
+function clearScreen(){
+  $('#homeButton').removeClass("active");
+  $('#contactButton').removeClass('active');
+  $('#aboutButton').removeClass('active');
+  $('#home').hide();
+  $('#contact').hide();
+  $('#about').hide();
+  
+}
+
+function home(){
+  clearScreen();
+  $('#home').show();
+  $('#homeButton').addClass('active');
+
+}
+
+function contact(){
+  clearScreen();
+  $('#contact').show();
+  $('#contactButton').addClass('active');
+}
+
+function about(){
+  clearScreen();
+  $('#about').show();
+  $('#aboutButton').addClass('active');
+}
+
 
 </script>
 
-<!--Below we include the Login Button social plugin. This button uses the JavaScript SDK to-->
-<!--present a graphical Login button that triggers the FB.login() function when clicked.-->
-<fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+
 </body>
 </html>

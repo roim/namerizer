@@ -6,14 +6,16 @@ import json
 
 
 def fetch(request, src):
-    if int(src)==42:
-        return HttpResponse(json.dumps({ "source" : "1"}), content_type="application/json") 
     nicks = Nickname.objects.filter(source=src)
-    nicks = [{'source': n.source, 'target': n.target, 'alias': n.alias} for n in nicks] or []
+    nicks = [{'source': n.source, 'target': n.target, 'alias': n.alias, 'name': n.name, 'username': n.username} for n in nicks] or []
 
     return HttpResponse(json.dumps(nicks), content_type="application/json")
 
-def update(request, src, tgt, nick):
-    nick = Nickname(source=src,target=tgt,alias=nick, pub_date=timezone.now())
+def update(request, src, tgt, nick, usr, usrname):
+    match_nicks = Nickname.objects.filter(source=src,target=tgt)
+    if match_nicks:
+        match_nicks = match_nicks[0]
+        match_nicks.delete()
+    nick = Nickname(source=src,target=tgt,alias=nick,name=usr,username=usrname)
     nick.save()
     return HttpResponse("created!")
