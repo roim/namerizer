@@ -7,16 +7,21 @@
   <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <script type="text/javascript" src="{% static '/jquery.min.js' %}"></script>
 </head>
 <body>
 <div id="fb-root"></div>
 
+
+
 <div class="ui-widget">
-  <label for="tags">Tags: </label>
+  <label for="tags" class="label">Search: </label>
   <input id="tags" onKeyPress="clickFriend()"/>
 </div>
 <table id='friendsBoard' hidden="true">
-  <td id="photoContainer">
+  <td>
+    <div id="photoContainer">
+    </div>
   </td>
   <td id="nameContainer">
   </td>
@@ -26,10 +31,9 @@
 </table>
 
 </div>
+<script type="text/javascript">
 
-
-
-<script>
+  
   window.fbAsyncInit = function() {
   FB.init({
     appId      : '455440761201461', // App ID
@@ -93,7 +97,7 @@
   var aux = new Array();
   FB.api("/me/friends",function(response){
     
-    var k=1;
+    var k=0;
     for(var i in response.data){
       availableTags.push(response.data[i].name);
       ids[k]=response.data[i].id;
@@ -129,22 +133,19 @@ function selectFriend(){
     $('#friendsBoard').show();
     $('#nameContainer').append($('#tags').val());
 
-
     for(var nome in availableTags){
         if(availableTags[nome]==$('#tags').val()){
           selectedId=ids[nome];
           nomeSelected = availableTags[nome];
-          alert("a="+selectedId);
           FB.api(selectedId+ "/picture",function(response){
-              alert(response.data.url);
-              $('#photoContainer').append('<img src=\"' + response.data.url  + '\"  \/>'); 
+              $('#photoContainer').html('<img src=\"' + response.data.url  + '\"  \/>');
 
           });
 
-
+          break;
 
         }
-        break;
+      
     }
     
 
@@ -152,30 +153,39 @@ function selectFriend(){
     
 }
 
-function clickFriend(){
+function isEnter(){
   var keycode;
   if (window.event) keycode = window.event.keyCode;
   else if (e) keycode = e.which;
-  else return true;
+  else return false;
 
   if (keycode == 13){
-     selectFriend();
-     return false;
+     return true;
+  }
+}
+
+function clickFriend(){
+  if(isEnter()){
+    selectFriend();
   }
 }
 
 function sendNickname(){
-  alert("http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + selectedId + "/" + $('#nicknameInput').val());
-  $.get(
-    "http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + selectedId + "/" + $('#nicknameInput').val() ,
-    {},
-    function(data) {
-       alert('page content: ' + data);
-    }
-  );
+ 
+  if(isEnter()){
+    $.get(
+      "http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + selectedId + "/" + $('#nicknameInput').val() ,
+      {},
+      function(data) {
+         alert('page content: ' + data);
+      }
+    );
+  }
 }
 
+
 </script>
+
 <!--Below we include the Login Button social plugin. This button uses the JavaScript SDK to-->
 <!--present a graphical Login button that triggers the FB.login() function when clicked.-->
 <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
