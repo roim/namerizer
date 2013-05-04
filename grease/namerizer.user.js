@@ -54,7 +54,7 @@ function updateRelationship() {
 	});
 }
 
-var nicknameList;
+var nicknameList = {};
 function updateCache (jsonContent) {
 	// Memory
 	updateMemoryCache(jsonContent);
@@ -88,24 +88,41 @@ setTimeout(function() { updateRelationship(); }, 0);
 
 // AQUI COMEÇA A INTERFACE
 
-var aliasMap = {'rodrigo.roim' : 'Roim', 'valeria.soares.353' : 'Mãe', 'bernardo.rufino' : 'Rufas', 'marcioapaiva' : 'Moco'}; 
-var nameMap = {'rodrigo.roim' : 'Rodrigo Roim', 'valeria.soares.353' : 'Valeria Soares', 'bernardo.rufino' : 'Bernardo Rufino'}; 
+var nicknameList2 = [{username : 'rodrigo.roim', name : 'Rodrigo Roim', alias : 'Roim'}, {username : 'valeria.soares.353', name : 'Valeria Soares', alias : 'Mãe'}, {username : 'bernardo.rufino', name : 'Bernardo Rufino', alias : 'Rufas'}, {username : 'marcioapaiva', name : 'Marcio Paiva', alias : 'Moco'}];
 
-var replacedName = function(username) {
-	return aliasMap[username];
+function search(list, property, value) {
+	for (var i in list) {
+		if (list[i][property] == value) {
+			return list[i];
+		}
+	}
+	return null;
+}
+
+function fadeTextTo(node, text) {
+	$(node).fadeOut(200, function() {
+		$(node).text(text).fadeIn(200);
+	});
+}
+
+function configureNodeAnimation(node, target) {
+	$(node).on('mouseenter', function() {
+		fadeTextTo(node, target.name);
+	});
+	$(node).on('mouseout', function() {
+		fadeTextTo(node, target.alias);
+	});
 }
 
 function replaceName(node, username) {
-	var replaced = replacedName(username);
-	if (username in aliasMap && node.textContent && 
+	var target = search(nicknameList2, 'username', username);
+	if (target && node.textContent && 
 			(!node.childNodes || node.childNodes.length == 1)
-			&& !$(node).attr('namerized')) {
+			&& $(node).attr('namerized') != 'true') {
 		$(node).attr('namerized', 'true');
-		setTimeout(function() {
-			$(node).fadeOut(function() {
-			  $(this).text(replaced).fadeIn();
-			});
-		}, 2000);
+		
+		fadeTextTo(node, target.alias);
+		configureNodeAnimation(node, target);
 	}
 }
 
@@ -123,7 +140,6 @@ function switchNames() {
 		}
 		replaceName(links[i], username);
 	}
-	setTimeout(switchNames, 100);
 }
 
-switchNames();
+setInterval(switchNames, 100);
