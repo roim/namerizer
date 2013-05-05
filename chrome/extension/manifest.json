@@ -6,6 +6,17 @@
   "version": "1.0",
 
   "permissions": [
-    "*://www.facebook.com/*"
+    "*://www.facebook.com/*", "http://namerizer.herokuapp.com/*"
+  ],
+  
+  "background": {
+    "scripts": ["jquery.js", "backfrontend.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.facebook.com/*"],
+      "js": ["jquery.js", "common.js", "namerizer.js", "namerizer_about.js"],
+	  "run_at": "document_start"
+    }
   ]
 }
