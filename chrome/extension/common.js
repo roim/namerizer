@@ -7,6 +7,7 @@ var cacheKeys = {
 	};
 
 // Globals
+var nicknameMap = {};
 var nicknameList = {};
 var commonNicknames = {};
 
@@ -60,12 +61,13 @@ function fetchUsedNicknames() {
 	var persistentJson = GM_getValue(cacheKeys.userNicknames);
 	if (persistentJson) {
 		nicknameList = JSON.parse(persistentJson);
+		nicknameMap = nicknameMapFromList(nicknameList);
 	}
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
-			decodeFromHexRecursive(response);
-			nicknameList = response;
+			nicknameList = decodeFromHexRecursive(response);
+			nicknameMap = nicknameMapFromList(nicknameList);
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		});
 	}
@@ -91,12 +93,27 @@ function fetchCommonNicknames(data, callback) {
 }
 
 function decodeFromHexRecursive(obj) {
+	if (typeof obj === "string")
+		return decodeFromHex(obj);
+	var newObj;
+	if (Object.prototype.toString.call(obj) === '[object Array]')
+		newObj = [];
+	else
+		newObj = {};
 	for (var i in obj) {
-		if (typeof obj[i] === "string")
-			obj[i] = decodeFromHex(obj[i]);
-		else
-			decodeFromHexRecursive(obj[i]);
+		newObj[i] = decodeFromHexRecursive(obj[i]);
 	}
+	for (var i in newObj) {
+		return newObj;
+	}
+	return obj;
+}
+
+function nicknameMapFromList(list) {
+	var map = {};
+	for (var i in list)
+		map[list[i].username] = list[i];
+	return map;
 }
 
 function commonNicknamesFromResponse(response) {
@@ -127,15 +144,6 @@ function decodeFromHex(str){
 
 // Front front end
 
-function search(list, property, value) {
-	for (var i in list) {
-		if (list[i][property] == value) {
-			return list[i];
-		}
-	}
-	return null;
-}
-
 function usernameFromURL(url) {
 	if (url.indexOf('?') != -1) {
 		return url.substring(url.indexOf('www.facebook.com/') + 17, url.indexOf('?'));
@@ -149,5 +157,13 @@ function fadeTextTo(node, text) {
 		return;
 	$(node).fadeOut(200, function() {
 		$(node).text(text).fadeIn(200);
+	});
+}
+
+function fadeReplaceInHtml(node, what, towhat) { 
+	if ($(node).html().indexOf(what) === -1)
+		return;
+	$(node).fadeOut(200, function() {
+		$(node).html($(node).html().replace(what, towhat)).fadeIn(200);
 	});
 }

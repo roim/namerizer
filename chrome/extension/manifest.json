@@ -10,7 +10,8 @@
   ],
   
   "background": {
-    "scripts": ["jquery.js", "backfrontend.js"]
+    "scripts": ["jquery.js", "backfrontend.js"],
+    "persistent": false
   },
   "content_scripts": [
     {
