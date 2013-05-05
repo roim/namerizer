@@ -10,7 +10,7 @@ function configureNodeAnimation(node, target) {
 }
 
 function replaceName(node, username) {
-	var target = search(nicknameList, 'username', username);
+	var target = nicknameMap[username];
 
 	if (target
 			&& $(node).html().indexOf(target.name) !== -1

@@ -7,6 +7,7 @@ var cacheKeys = {
 	};
 
 // Globals
+var nicknameMap = {};
 var nicknameList = {};
 var commonNicknames = {};
 
@@ -60,11 +61,13 @@ function fetchUsedNicknames() {
 	var persistentJson = GM_getValue(cacheKeys.userNicknames);
 	if (persistentJson) {
 		nicknameList = JSON.parse(persistentJson);
+		nicknameMap = nicknameMapFromList(nicknameList);
 	}
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
 			nicknameList = decodeFromHexRecursive(response);
+			nicknameMap = nicknameMapFromList(nicknameList);
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		});
 	}
@@ -106,6 +109,13 @@ function decodeFromHexRecursive(obj) {
 	return obj;
 }
 
+function nicknameMapFromList(list) {
+	var map = {};
+	for (var i in list)
+		map[list[i].username] = list[i];
+	return map;
+}
+
 function commonNicknamesFromResponse(response) {
 	var nicknames;
 
@@ -133,15 +143,6 @@ function decodeFromHex(str){
 }
 
 // Front front end
-
-function search(list, property, value) {
-	for (var i in list) {
-		if (list[i][property] == value) {
-			return list[i];
-		}
-	}
-	return null;
-}
 
 function usernameFromURL(url) {
 	if (url.indexOf('?') != -1) {

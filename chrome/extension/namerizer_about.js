@@ -43,7 +43,7 @@ function createCommonNicknames() {
 	if (commonNicknames[currentProfileUsername]) {
 		$commonNicknamesAnchor.text(commonNicknames[currentProfileUsername]);
 	} else {
-		var target = search(nicknameList, 'username', currentProfileUsername);
+		var target = nicknameMap[currentProfileUsername];
 		if (target) {
 			$commonNicknamesAnchor.text(target.alias);
 		}
