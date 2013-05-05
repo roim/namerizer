@@ -64,8 +64,7 @@ function fetchUsedNicknames() {
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
-			decodeFromHexRecursive(response);
-			nicknameList = response;
+			nicknameList = decodeFromHexRecursive(response);
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		});
 	}
@@ -91,12 +90,20 @@ function fetchCommonNicknames(data, callback) {
 }
 
 function decodeFromHexRecursive(obj) {
+	if (typeof obj === "string")
+		return decodeFromHex(obj);
+	var newObj;
+	if (Object.prototype.toString.call(obj) === '[object Array]')
+		newObj = [];
+	else
+		newObj = {};
 	for (var i in obj) {
-		if (typeof obj[i] === "string")
-			obj[i] = decodeFromHex(obj[i]);
-		else
-			decodeFromHexRecursive(obj[i]);
+		newObj[i] = decodeFromHexRecursive(obj[i]);
 	}
+	for (var i in newObj) {
+		return newObj;
+	}
+	return obj;
 }
 
 function commonNicknamesFromResponse(response) {
