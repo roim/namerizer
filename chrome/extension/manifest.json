@@ -19,5 +19,6 @@
       "js": ["jquery.js", "common.js", "namerizer.js", "namerizer_about.js"],
 	  "run_at": "document_start"
     }
-  ]
+  ],
+  "web_accessible_resources": ["commonNicknamesIcon.png"]
 }
