@@ -1,21 +1,23 @@
+
+
 function configureNodeAnimation(node, target) {
 	$(node).on('mouseenter', function() {
-		fadeTextTo(node, target.name);
+		fadeReplaceInHtml(node, target.alias, target.name);
 	});
 	$(node).on('mouseout', function() {
-		fadeTextTo(node, target.alias);
+		fadeReplaceInHtml(node, target.name, target.alias);
 	});
 }
 
 function replaceName(node, username) {
 	var target = search(nicknameList, 'username', username);
+
 	if (target
-			&& ($(node).children().length == 0)
-			&& $(node).attr('namerized') != 'true' 
-			&& $(node).text() == target.name) {
+			&& $(node).html().indexOf(target.name) !== -1
+			&& !$(node).attr('namerized')) {
 		$(node).attr('namerized', 'true');
-		
-		$(node).text(target.alias);
+
+		$(node).html($(node).html().replace(target.name, target.alias));
 		configureNodeAnimation(node, target);
 	}
 }
@@ -37,10 +39,11 @@ MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 var observer = new MutationObserver(function(mutations) {
 	for (var i in mutations) {
-		var addedNodes = mutations[i].addedNodes;
-		if (!addedNodes) continue;
-		for (var j = 0; j < addedNodes.length; j++) {
-			switchNames($(addedNodes[j]).find('a'));
+		if (mutations[i].type == 'childList' && mutations[i].addedNodes) {
+			var addedNodes = mutations[i].addedNodes;
+			for (var j = 0; j < addedNodes.length; j++) {
+				switchNames($(addedNodes[j]).find('a'));
+			}
 		}
 	}
 });

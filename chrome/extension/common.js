@@ -151,3 +151,11 @@ function fadeTextTo(node, text) {
 		$(node).text(text).fadeIn(200);
 	});
 }
+
+function fadeReplaceInHtml(node, what, towhat) { 
+	if ($(node).html().indexOf(what) === -1)
+		return;
+	$(node).fadeOut(200, function() {
+		$(node).html($(node).html().replace(what, towhat)).fadeIn(200);
+	});
+}
