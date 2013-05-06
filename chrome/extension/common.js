@@ -10,7 +10,6 @@ var cacheKeys = {
 var nicknameMap = {};
 var nicknameMapForId = {};
 var nicknameList = {};
-var commonNicknames = {};
 
  // for local cache
 if (!this.GM_getValue || (this.GM_getValue.toString && this.GM_getValue.toString().indexOf("not supported")>-1)) {
@@ -78,23 +77,14 @@ function fetchUsedNicknames() {
 	}
 }
 
-function fetchCommonNicknames(data, callback) {
-	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
-	if (persistentJson) {
-		commonNicknames = JSON.parse(persistentJson);
-		if (commonNicknames[data.username] && callback)
-			callback(commonNicknames[data.username], 'cache');
-	}
-	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
-			var nicknames = commonNicknamesFromResponse(response);
-			if (nicknames != '-') {
-				commonNicknames[data.username] = nicknames;
-				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
-			}
-			if (callback) {
-				callback(nicknames, 'server');
-			}
-	});
+function nicknameMapFromList(list, key) {
+	if (!key)
+		key = 'username';
+	var map = {};
+	for (var i in list)
+		if (list[i][key])
+			map[list[i][key].toString()] = list[i];
+	return map;
 }
 
 function decodeFromHexRecursive(obj) {
@@ -114,30 +104,6 @@ function decodeFromHexRecursive(obj) {
 	return obj;
 }
 
-function nicknameMapFromList(list, key) {
-	if (!key)
-		key = 'username';
-	var map = {};
-	for (var i in list)
-		if (list[i][key])
-			map[list[i][key].toString()] = list[i];
-	return map;
-}
-
-function commonNicknamesFromResponse(response) {
-	var nicknames;
-
-	if (response.length == 0) {
-		nicknames = '-';
-	} else {
-		nicknames = decodeFromHex(response[0][0]);
-		for (var i = 1; i < response.length; i++) {
-			nicknames += ', ' + decodeFromHex(response[i][0]);
-		}
-	}
-	return nicknames;
-}
-
 function decodeFromHex(str){
     var r="";
     var e=str.length;
@@ -151,6 +117,14 @@ function decodeFromHex(str){
 }
 
 // Front front end
+
+var stringReplaceUtil = "#@!N%$am!@eri#@z_er_Stri_ngRe_pLa_ceUt_il!@#"
+function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
+	if (notWhenIn.indexOf(what) !== -1)
+		return where.replace(notWhenIn, stringReplaceUtil).replace(what, towhat).replace(stringReplaceUtil, notWhenIn);
+	else
+		return where.replace(what, towhat);
+}
 
 function usernameFromURL(url) {
 	if (url.indexOf('?') != -1) {
@@ -167,15 +141,16 @@ function usernameFromMessagesURL(url) {
 function fadeTextTo(node, text) {
 	if (text == $(node).text())
 		return;
-	$(node).fadeOut(200, function() {
-		$(node).text(text).fadeIn(200);
+	$(node).animate({ opacity: 0 }, 'fast', function() {
+		$(node).text(text).animate({ opacity: 1 }, 'fast');
 	});
 }
 
 function fadeReplaceInHtml(node, what, towhat) {
-	if ($(node).html().indexOf(what) === -1 || $(node).html().indexOf(towhat) !== -1)
+	if ($(node).html().indexOf(what) === -1 && !$(node).is(':animated') )
 		return;
-	$(node).fadeOut(200, function() {
-		$(node).html($(node).html().replace(what, towhat)).fadeIn(200);
+	$(node).stop();
+	$(node).animate({ opacity: 0 }, 'fast', function() {
+		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).animate({ opacity: 1 }, 'fast');
 	});
 }

@@ -1,24 +1,48 @@
 
-
-function configureNodeAnimation(node, target) {
-	$(node).on('mouseenter', function() {
-		fadeReplaceInHtml(node, target.alias, target.name);
+function findElementsDirectlyContainingText(ancestor, text) {
+	var childrenContaining = $(ancestor).find(":contains(" + text + ")");
+	if (childrenContaining.length === 0) {
+		return [ancestor];
+	}
+	var array = [];
+	childrenContaining.each(function(i, child) {
+		array = array.concat(findElementsDirectlyContainingText(child, text));
 	});
-	$(node).on('mouseout', function() {
-		fadeReplaceInHtml(node, target.name, target.alias);
+	return array;
+}
+
+function configureNodeAnimation(parentNode, whereToReplace, target) {
+	$(parentNode).on('mouseenter', function(event) {
+		if ($(parentNode).find(event.fromElement).size()) return;
+		for (var i in whereToReplace) {
+			node = whereToReplace[i];
+			fadeReplaceInHtml(node, target.alias, target.name);
+		}
+	});
+	$(parentNode).on('mouseleave', function(event) {
+		if ($(parentNode).find(event.toElement).size()) return;
+		for (var i in whereToReplace) {
+			node = whereToReplace[i];
+			fadeReplaceInHtml(node, target.name, target.alias);
+		}
 	});
 }
 
-function replaceName(node, target) {
-	if (target
-			&& $(node).html().indexOf(target.name) !== -1
-			&& !$(node).attr('namerized')) {
-		$(node).attr('namerized', 'true');
-
-		$(node).html($(node).html().replace(target.name, target.alias));
-		configureNodeAnimation(node, target);
-		return true;
+function replaceName(parentNode, target) {
+	if(!target || $(parentNode).attr('namerized')) {
+		return false;
 	}
+	var whereToReplace = findElementsDirectlyContainingText(parentNode, target.name);
+	if (whereToReplace.length == 0)
+		return false;
+	for (var i in whereToReplace) {
+		node = whereToReplace[i];
+		if ($(node).html().indexOf(target.name) !== -1) {
+			$(node).html($(node).html().replace(target.name, target.alias));
+		}
+	}
+	$(parentNode).attr('namerized', 'true');
+	configureNodeAnimation(parentNode, whereToReplace, target);
 	return false;
 }
 
@@ -31,6 +55,7 @@ function switchNames(links) {
 		if (!href) {
 		  continue;
 		}
+
 		if (!replaceName(links[i], nicknameMap[usernameFromURL(href)])) {
 			replaceName(links[i], nicknameMapForId[usernameFromMessagesURL(href)]);
 		}

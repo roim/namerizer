@@ -1,3 +1,39 @@
+var commonNicknames = {};
+
+function fetchCommonNicknames(data, callback) {
+	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
+	if (persistentJson) {
+		commonNicknames = JSON.parse(persistentJson);
+		if (commonNicknames[data.username] && callback)
+			callback(commonNicknames[data.username], 'cache');
+	}
+	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
+			var nicknames = commonNicknamesFromResponse(response);
+			if (nicknames != '-') {
+				commonNicknames[data.username] = nicknames;
+				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
+			}
+			if (callback) {
+				callback(nicknames, 'server');
+			}
+	});
+}
+
+function commonNicknamesFromResponse(response) {
+	var nicknames;
+
+	if (response.length == 0) {
+		nicknames = '-';
+	} else {
+		nicknames = decodeFromHex(response[0][0]);
+		for (var i = 1; i < response.length; i++) {
+			nicknames += ', ' + decodeFromHex(response[i][0]);
+		}
+	}
+	return nicknames;
+}
+
+// Front front end
 function findProfileOwnerId() {
 	var columns = $('#pagelet_timeline_main_column');
 	for (var i = 0; i < columns.length; i++) {
