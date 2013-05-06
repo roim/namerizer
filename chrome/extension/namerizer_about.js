@@ -3,41 +3,71 @@ var commonNicknames = {};
 function fetchCommonNicknames(data, callback) {
 	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
 	if (persistentJson) {
-		commonNicknames = JSON.parse(persistentJson);
-		if (commonNicknames[data.username] && callback)
-			callback(commonNicknames[data.username], 'cache');
+		var parsedJSON = JSON.parse(persistentJson);
+		if (!arrayEquals(commonNicknames[data.username], parsedJSON[data.username]) && callback)
+			callback(parsedJSON[data.username], 'cache');
+		if (!arrayEquals(commonNicknames, parsedJSON))
+			commonNicknames = parsedJSON;
 	}
 	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
 			var nicknames = commonNicknamesFromResponse(response);
-			if (nicknames != '-') {
+			if (!arrayEquals(commonNicknames[data.username], nicknames)) {
 				commonNicknames[data.username] = nicknames;
 				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
-			}
-			if (callback) {
-				callback(nicknames, 'server');
+				if (callback) {
+					callback(nicknames, 'server');
+				}
 			}
 	});
 }
 
 function commonNicknamesFromResponse(response) {
-	var nicknames;
-
-	if (response.length == 0) {
-		nicknames = '-';
-	} else {
-		nicknames = decodeFromHex(response[0][0]);
-		for (var i = 1; i < response.length; i++) {
-			nicknames += ', ' + decodeFromHex(response[i][0]);
-		}
+	var nicknames = [];
+	for (var i = 0; i < response.length; i++) {
+		nicknames.push(decodeFromHex(response[i][0]));
 	}
 	return nicknames;
 }
 
 // Front front end
 
-var currentProfileUsername;
+function anchorFromAlias(alias) {
+	if (!isProfileOwnerFriend())
+		return $('<a target="_blank" href="http://namerizer.herokuapp.com/" class="profileLink" data-hover="tooltip" aria-label="From Namerizer app" data-tooltip-alignh="center"/>').text(alias);
 
-var $commonNicknamesAnchor;
+	return $('<a class="profileLink" data-hover="tooltip" aria-label="Use this nickname" data-tooltip-alignh="center"/>').text(alias).click(function() {
+		var $profileName = $('#fbProfileCover .cover div a');
+		var alternateName = $profileName.find('.alternate_name');
+		var target = nicknameMap[usernameFromURL($profileName.attr('href'))];
+		sendNicknameToServer({
+			source: currentUserId, 
+			target: findProfileOwnerId(), 
+			alias: alias,
+			name: 
+				target ? target.name : (
+					alternateName ? 
+						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : 
+						$profileName.text()),
+			username: currentProfileUsername
+		});
+	});
+}
+
+function updatecommonNicknamesSpan(nicknameList) {
+	if (!nicknameList.length) {
+		$commonNicknamesSpan.text('-');
+		return;
+	}
+	$commonNicknamesSpan.text('');
+	$commonNicknamesSpan.append(anchorFromAlias(nicknameList[0]));
+	for (var i = 1; i < nicknameList.length; i++) {
+		$commonNicknamesSpan.append(', ');
+		$commonNicknamesSpan.append(anchorFromAlias(nicknameList[i]));
+	}
+}
+
+var currentProfileUsername;
+var $commonNicknamesSpan;
 
 function createCommonNicknames() {
 	var aboutContent;
@@ -61,25 +91,25 @@ function createCommonNicknames() {
 	var imgUrl = chrome.extension.getURL("commonNicknamesIcon.png");
 	var $elm = $('<div class="clearfix" />').appendTo($('<li class="_4_uf" id="namerizer_nicknames"/>').appendTo($info));
 	$elm.append('<img class="_s0 _51iw _29h _29i _54rv img" width="16" height="16" alt="" src="' + imgUrl + '"/>');
-	$commonNicknamesAnchor = $('<a target="_blank" class="profileLink" href="http://namerizer.herokuapp.com/" data-hover="tooltip" aria-label="From Namerizer app" data-tooltip-alignh="center"/>').appendTo(
+	$commonNicknamesSpan = $('<span/>').appendTo(
 		$('<li class="_4_ug"/>').appendTo($('<ul class="uiList _4_vp _29j _29k _513w _4kg"/>').appendTo($elm)).text('Common nicknames: ')
 	).text('-');
-	
+		
 	if (commonNicknames[currentProfileUsername]) {
-		$commonNicknamesAnchor.text(commonNicknames[currentProfileUsername]);
+		updatecommonNicknamesSpan(commonNicknames[currentProfileUsername]);
 	} else {
 		var target = nicknameMap[currentProfileUsername];
 		if (target) {
-			$commonNicknamesAnchor.text(target.alias);
+			updatecommonNicknamesSpan([target.alias]);
 		}
 	}
 
 	fetchCommonNicknames({userId: findProfileOwnerId(), username: currentProfileUsername}, function(response, origin) {
 		if (origin == 'cache') {
-			$commonNicknamesAnchor.text(response);
+			updatecommonNicknamesSpan(response);
 		}
 		else {
-			fadeTextTo($commonNicknamesAnchor, response);
+			animateApplyFunction($commonNicknamesSpan, function() {updatecommonNicknamesSpan(response)});
 		}
 	});
 }
@@ -89,12 +119,12 @@ currentProfileUsername = usernameFromURL(window.location.href);
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 var observer = new MutationObserver(function(mutations) {
 	var newProfileUsername = usernameFromURL(window.location.href);
-	if (currentProfileUsername != newProfileUsername ||  ($commonNicknamesAnchor && !$.contains(document.documentElement, $commonNicknamesAnchor[0]))) {
+	if (currentProfileUsername != newProfileUsername ||  ($commonNicknamesSpan && !$.contains(document.documentElement, $commonNicknamesSpan[0]))) {
 		currentProfileUsername = newProfileUsername;
-		$commonNicknamesAnchor = null;
+		$commonNicknamesSpan = null;
 	}
 		
-	if (!$commonNicknamesAnchor)
+	if (!$commonNicknamesSpan)
 		createCommonNicknames();
 });
 

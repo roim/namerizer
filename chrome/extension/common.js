@@ -116,7 +116,18 @@ function decodeFromHex(str){
     return r.replace(String.fromCharCode(0), "");
 }
 
+function arrayEquals(arr1, arr2) {
+	if (!arr1 || !arr2)
+		return arr1 === arr2;
+	return !(arr1 < arr2 || arr1 > arr2);
+}
+
 // Front front end
+
+function isProfileOwnerFriend() {
+	var isFriends = $('#pagelet_timeline_profile_actions .FriendButton .FriendRequestFriends');
+	return isFriends.length && !isFriends.hasClass('hidden_elem');
+}
 
 function findProfileOwnerId() {
 	var columns = $('#pagelet_timeline_main_column');
@@ -156,6 +167,13 @@ function fadeTextTo(node, text) {
 		return;
 	$(node).animate({ opacity: 0 }, 'fast', function() {
 		$(node).text(text).animate({ opacity: 1 }, 'fast');
+	});
+}
+
+function animateApplyFunction(node, callback) {
+	$(node).animate({ opacity: 0 }, 'fast', function() {
+		callback();
+		$(node).animate({ opacity: 1 }, 'fast');
 	});
 }
 
