@@ -146,11 +146,11 @@ function fadeTextTo(node, text) {
 	});
 }
 
-function fadeReplaceInHtml(node, what, towhat) {
-	if ($(node).html().indexOf(what) === -1 && !$(node).is(':animated') )
+function fadeReplaceInText(node, what, towhat) {
+	if ($(node).text().indexOf(what) === -1 && !$(node).is(':animated') )
 		return;
 	$(node).stop();
 	$(node).animate({ opacity: 0 }, 'fast', function() {
-		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).animate({ opacity: 1 }, 'fast');
+		$(node).text(replaceOnStringExcluding($(node).text(), what, towhat, towhat)).animate({ opacity: 1 }, 'fast');
 	});
 }

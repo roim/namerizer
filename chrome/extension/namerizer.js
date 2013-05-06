@@ -16,14 +16,14 @@ function configureNodeAnimation(parentNode, whereToReplace, target) {
 		if ($(parentNode).find(event.fromElement).size()) return;
 		for (var i in whereToReplace) {
 			node = whereToReplace[i];
-			fadeReplaceInHtml(node, target.alias, target.name);
+			fadeReplaceInText(node, target.alias, target.name);
 		}
 	});
 	$(parentNode).on('mouseleave', function(event) {
 		if ($(parentNode).find(event.toElement).size()) return;
 		for (var i in whereToReplace) {
 			node = whereToReplace[i];
-			fadeReplaceInHtml(node, target.name, target.alias);
+			fadeReplaceInText(node, target.name, target.alias);
 		}
 	});
 }
@@ -37,8 +37,8 @@ function replaceName(parentNode, target) {
 		return false;
 	for (var i in whereToReplace) {
 		node = whereToReplace[i];
-		if ($(node).html().indexOf(target.name) !== -1) {
-			$(node).html($(node).html().replace(target.name, target.alias));
+		if ($(node).text().indexOf(target.name) !== -1) {
+			$(node).text($(node).text().replace(target.name, target.alias));
 		}
 	}
 	$(parentNode).attr('namerized', 'true');
