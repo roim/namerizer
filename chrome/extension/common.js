@@ -122,8 +122,8 @@ function commonNicknamesFromResponse(response) {
 	if (response.length == 0) {
 		nicknames = '-';
 	} else {
-		nicknames = decodeFromHex(response[response.length - 1][0]);
-		for (var i = response.length - 2; i >= 0; i--) {
+		nicknames = decodeFromHex(response[0][0]);
+		for (var i = 1; i < response.length; i++) {
 			nicknames += ', ' + decodeFromHex(response[i][0]);
 		}
 	}
