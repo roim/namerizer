@@ -13,14 +13,14 @@ function findElementsDirectlyContainingText(ancestor, text) {
 
 function configureNodeAnimation(parentNode, whereToReplace, target) {
 	$(parentNode).on('mouseenter', function(event) {
-		if (event.target != parentNode) return;
+		if ($(parentNode).find(event.fromElement).size()) return;
 		for (var i in whereToReplace) {
 			node = whereToReplace[i];
 			fadeReplaceInHtml(node, target.alias, target.name);
 		}
 	});
 	$(parentNode).on('mouseleave', function(event) {
-		if (event.target != parentNode) return;
+		if ($(parentNode).find(event.toElement).size()) return;
 		for (var i in whereToReplace) {
 			node = whereToReplace[i];
 			fadeReplaceInHtml(node, target.name, target.alias);
