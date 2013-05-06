@@ -9,9 +9,7 @@ function configureNodeAnimation(node, target) {
 	});
 }
 
-function replaceName(node, username) {
-	var target = nicknameMap[username];
-
+function replaceName(node, target) {
 	if (target
 			&& $(node).html().indexOf(target.name) !== -1
 			&& !$(node).attr('namerized')) {
@@ -19,7 +17,9 @@ function replaceName(node, username) {
 
 		$(node).html($(node).html().replace(target.name, target.alias));
 		configureNodeAnimation(node, target);
+		return true;
 	}
+	return false;
 }
 
 
@@ -31,7 +31,9 @@ function switchNames(links) {
 		if (!href) {
 		  continue;
 		}
-		replaceName(links[i], usernameFromURL(href));
+		if (!replaceName(links[i], nicknameMap[usernameFromURL(href)])) {
+			replaceName(links[i], nicknameMapForId[usernameFromMessagesURL(href)]);
+		}
 	}
 }
 

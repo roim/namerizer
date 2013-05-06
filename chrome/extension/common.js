@@ -8,6 +8,7 @@ var cacheKeys = {
 
 // Globals
 var nicknameMap = {};
+var nicknameMapForId = {};
 var nicknameList = {};
 var commonNicknames = {};
 
@@ -61,13 +62,15 @@ function fetchUsedNicknames() {
 	var persistentJson = GM_getValue(cacheKeys.userNicknames);
 	if (persistentJson) {
 		nicknameList = JSON.parse(persistentJson);
-		nicknameMap = nicknameMapFromList(nicknameList);
+		nicknameMap = nicknameMapFromList(nicknameList, 'username');
+		nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
 	}
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
 			nicknameList = decodeFromHexRecursive(response);
-			nicknameMap = nicknameMapFromList(nicknameList);
+			nicknameMap = nicknameMapFromList(nicknameList, 'username');
+			nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		});
 	}
@@ -109,10 +112,13 @@ function decodeFromHexRecursive(obj) {
 	return obj;
 }
 
-function nicknameMapFromList(list) {
+function nicknameMapFromList(list, key) {
+	if (!key)
+		key = 'username';
 	var map = {};
 	for (var i in list)
-		map[list[i].username] = list[i];
+		if (list[i][key])
+			map[list[i][key].toString()] = list[i];
 	return map;
 }
 
@@ -152,6 +158,10 @@ function usernameFromURL(url) {
 	}
 }
 
+function usernameFromMessagesURL(url) {
+	return url.substring(url.lastIndexOf('/') + 1);
+}
+
 function fadeTextTo(node, text) {
 	if (text == $(node).text())
 		return;
@@ -160,7 +170,7 @@ function fadeTextTo(node, text) {
 	});
 }
 
-function fadeReplaceInHtml(node, what, towhat) { 
+function fadeReplaceInHtml(node, what, towhat) {
 	if ($(node).html().indexOf(what) === -1)
 		return;
 	$(node).fadeOut(200, function() {
