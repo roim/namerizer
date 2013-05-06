@@ -82,8 +82,7 @@ function editNickname() {
 
 function createEditNicknames() {
 	var actionsDropdown = $('#pagelet_timeline_profile_actions');
-	var isFriends = actionsDropdown.find('.FriendButton .FriendRequestFriends');
-	if (!actionsDropdown || !actionsDropdown.length || !isFriends.length || isFriends.hasClass('hidden_elem') || 
+	if (!actionsDropdown || !actionsDropdown.length || !isProfileOwnerFriend() || 
 		($editNicknamesButton && !$.contains(actionsDropdown, $editNicknamesButton[0])))
 		return;
 
