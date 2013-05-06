@@ -4,6 +4,11 @@
   "name": "Namerizer Chrome Extension",
   "description": "Namerizer renames the names of your named friends.",
   "version": "1.0",
+  
+  "icons": { "16": "icon16.png",
+           "48": "icon48.png",
+          "128": "icon128.png" },
+  "web_accessible_resources": ["commonNicknamesIcon.png"],
 
   "permissions": [
     "*://www.facebook.com/*", "http://namerizer.herokuapp.com/*"
@@ -19,6 +24,5 @@
       "js": ["jquery.js", "common.js", "namerizer.js", "namerizer_about.js"],
 	  "run_at": "document_start"
     }
-  ],
-  "web_accessible_resources": ["commonNicknamesIcon.png"]
+  ]
 }
