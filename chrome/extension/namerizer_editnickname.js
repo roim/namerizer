@@ -87,9 +87,10 @@ function createEditNicknames() {
 		($editNicknamesButton && !$.contains(actionsDropdown, $editNicknamesButton[0])))
 		return;
 
-	$editNicknamesButton = $('<span class="uiButtonGroup uiButtonGroupOverlay" id="u_0_g_namerizer"><span class="uiButtonGroupItem buttonItem firstItem lastItem"><a class="uiButton uiButtonOverlay uiButtonLarge" role="button"><span class="uiButtonText">Edit Nickname</span></a></span></span>');
+	$editNicknamesButton = $('<span class="uiButtonGroupItem buttonItem firstItem"><a class="uiButton uiButtonOverlay uiButtonLarge" role="button" data-hover="tooltip" aria-label="Edit user nickname" data-tooltip-alignh="center"><span class="uiButtonText">Nickname</span></a></span>');
 	$editNicknamesButton.click(editNickname);
-	$editNicknamesButton.prependTo(actionsDropdown);
+	$(actionsDropdown.find('.actionsContents .firstItem')).removeClass('firstItem');
+	$editNicknamesButton.prependTo(actionsDropdown.find('.actionsContents'));
 }
 
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
