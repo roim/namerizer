@@ -54,11 +54,16 @@ function editNickname() {
 		if (e.which === 13) {
 			$editNicknameDiv.remove();
 			$profileName.show();
+			var alternateName = $profileName.find('.alternate_name');
 			sendNicknameToServer({
 				source: currentUserId, 
 				target: findProfileOwnerId(), 
 				alias: $editNicknameDiv.text(),
-				name: target ? target.name : $profileName.text(),
+				name: 
+					target ? target.name : (
+						alternateName ? 
+							$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : 
+							$profileName.text()),
 				username: currentProfileUsername
 			});
 			return false;
