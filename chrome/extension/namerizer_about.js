@@ -34,18 +34,6 @@ function commonNicknamesFromResponse(response) {
 }
 
 // Front front end
-function findProfileOwnerId() {
-	var columns = $('#pagelet_timeline_main_column');
-	for (var i = 0; i < columns.length; i++) {
-		var datagt = $(columns[i]).attr('data-gt');
-		if (datagt) {
-			datagt = JSON.parse(datagt);
-			if (datagt['profile_owner']) {
-				return datagt['profile_owner'];
-			}
-		}
-	}
-}
 
 var currentProfileUsername;
 
@@ -101,7 +89,7 @@ currentProfileUsername = usernameFromURL(window.location.href);
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 var observer = new MutationObserver(function(mutations) {
 	var newProfileUsername = usernameFromURL(window.location.href);
-	if (currentProfileUsername != newProfileUsername) {
+	if (currentProfileUsername != newProfileUsername ||  ($commonNicknamesAnchor && !$.contains(document.documentElement, $commonNicknamesAnchor[0]))) {
 		currentProfileUsername = newProfileUsername;
 		$commonNicknamesAnchor = null;
 	}

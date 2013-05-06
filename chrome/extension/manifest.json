@@ -21,7 +21,7 @@
   "content_scripts": [
     {
       "matches": ["*://www.facebook.com/*"],
-      "js": ["jquery.js", "common.js", "namerizer.js", "namerizer_about.js"],
+      "js": ["jquery.js", "common.js", "namerizer.js", "namerizer_about.js", "namerizer_editnickname.js"],
 	  "run_at": "document_start"
     }
   ]

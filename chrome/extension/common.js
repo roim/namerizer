@@ -118,6 +118,19 @@ function decodeFromHex(str){
 
 // Front front end
 
+function findProfileOwnerId() {
+	var columns = $('#pagelet_timeline_main_column');
+	for (var i = 0; i < columns.length; i++) {
+		var datagt = $(columns[i]).attr('data-gt');
+		if (datagt) {
+			datagt = JSON.parse(datagt);
+			if (datagt['profile_owner']) {
+				return datagt['profile_owner'];
+			}
+		}
+	}
+}
+
 var stringReplaceUtil = "#@!N%$am!@eri#@z_er_Stri_ngRe_pLa_ceUt_il!@#"
 function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
 	if (notWhenIn.indexOf(what) !== -1)
@@ -134,7 +147,7 @@ function usernameFromURL(url) {
 	}
 }
 
-function usernameFromMessagesURL(url) {
+function userIdFromMessagesURL(url) {
 	return url.substring(url.lastIndexOf('/') + 1);
 }
 
