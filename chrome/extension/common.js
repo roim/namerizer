@@ -173,7 +173,7 @@ function fadeTextTo(node, text) {
 }
 
 function fadeReplaceInHtml(node, what, towhat) {
-	if ($(node).html().indexOf(what) === -1)
+	if ($(node).html().indexOf(what) === -1 || $(node).html().indexOf(towhat) !== -1)
 		return;
 	$(node).fadeOut(200, function() {
 		$(node).html($(node).html().replace(what, towhat)).fadeIn(200);
