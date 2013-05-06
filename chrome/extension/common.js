@@ -182,13 +182,10 @@ function fadeTextTo(node, text) {
 
 var ongoingTransitions = {};
 function fadeReplaceInHtml(node, what, towhat) {
-	if ($(node).html().indexOf(what) === -1 && ongoingTransitions[node] != what)
+	if ($(node).html().indexOf(what) === -1 && !$(node).is(':animated') )
 		return;
-	ongoingTransitions[node] = towhat;
+	$(node).stop();
 	$(node).fadeOut(200, function() {
-		if (ongoingTransitions[node] != towhat) {
-			return;
-		}
 		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).fadeIn(200);
 	});
 }
