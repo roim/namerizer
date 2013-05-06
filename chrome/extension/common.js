@@ -10,7 +10,6 @@ var cacheKeys = {
 var nicknameMap = {};
 var nicknameMapForId = {};
 var nicknameList = {};
-var commonNicknames = {};
 
  // for local cache
 if (!this.GM_getValue || (this.GM_getValue.toString && this.GM_getValue.toString().indexOf("not supported")>-1)) {
@@ -78,23 +77,14 @@ function fetchUsedNicknames() {
 	}
 }
 
-function fetchCommonNicknames(data, callback) {
-	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
-	if (persistentJson) {
-		commonNicknames = JSON.parse(persistentJson);
-		if (commonNicknames[data.username] && callback)
-			callback(commonNicknames[data.username], 'cache');
-	}
-	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
-			var nicknames = commonNicknamesFromResponse(response);
-			if (nicknames != '-') {
-				commonNicknames[data.username] = nicknames;
-				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
-			}
-			if (callback) {
-				callback(nicknames, 'server');
-			}
-	});
+function nicknameMapFromList(list, key) {
+	if (!key)
+		key = 'username';
+	var map = {};
+	for (var i in list)
+		if (list[i][key])
+			map[list[i][key].toString()] = list[i];
+	return map;
 }
 
 function decodeFromHexRecursive(obj) {
@@ -112,30 +102,6 @@ function decodeFromHexRecursive(obj) {
 		return newObj;
 	}
 	return obj;
-}
-
-function nicknameMapFromList(list, key) {
-	if (!key)
-		key = 'username';
-	var map = {};
-	for (var i in list)
-		if (list[i][key])
-			map[list[i][key].toString()] = list[i];
-	return map;
-}
-
-function commonNicknamesFromResponse(response) {
-	var nicknames;
-
-	if (response.length == 0) {
-		nicknames = '-';
-	} else {
-		nicknames = decodeFromHex(response[0][0]);
-		for (var i = 1; i < response.length; i++) {
-			nicknames += ', ' + decodeFromHex(response[i][0]);
-		}
-	}
-	return nicknames;
 }
 
 function decodeFromHex(str){
