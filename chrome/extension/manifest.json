@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "name": "Namerizer Chrome Extension",
+  "name": "Namerizer",
   "description": "Namerizer renames the names of your named friends.",
   "version": "1.0",
   
