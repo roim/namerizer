@@ -1,10 +1,12 @@
 
 
 function configureNodeAnimation(node, target) {
-	$(node).on('mouseenter', function() {
+	$(node).on('mouseenter', function(event) {
+		if (event.target != node) return;
 		fadeReplaceInHtml(node, target.alias, target.name);
 	});
-	$(node).on('mouseout', function() {
+	$(node).on('mouseleave', function(event) {
+		if (event.target != node) return;
 		fadeReplaceInHtml(node, target.name, target.alias);
 	});
 }

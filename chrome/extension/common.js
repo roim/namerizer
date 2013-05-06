@@ -152,6 +152,14 @@ function decodeFromHex(str){
 
 // Front front end
 
+var stringReplaceUtil = "#@!N%$am!@eri#@z_er_Stri_ngRe_pLa_ceUt_il!@#"
+function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
+	if (notWhenIn.indexOf(what) !== -1)
+		return where.replace(notWhenIn, stringReplaceUtil).replace(what, towhat).replace(stringReplaceUtil, notWhenIn);
+	else
+		return where.replace(what, towhat);
+}
+
 function usernameFromURL(url) {
 	if (url.indexOf('?') != -1) {
 		return url.substring(url.indexOf('www.facebook.com/') + 17, url.indexOf('?'));
@@ -173,9 +181,9 @@ function fadeTextTo(node, text) {
 }
 
 function fadeReplaceInHtml(node, what, towhat) {
-	if ($(node).html().indexOf(what) === -1 || $(node).html().indexOf(towhat) !== -1)
+	if ($(node).html().indexOf(what) === -1)
 		return;
 	$(node).fadeOut(200, function() {
-		$(node).html($(node).html().replace(what, towhat)).fadeIn(200);
+		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).fadeIn(200);
 	});
 }
