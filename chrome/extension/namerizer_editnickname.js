@@ -77,7 +77,9 @@ function editNickname() {
 
 function createEditNicknames() {
 	var actionsDropdown = $('#pagelet_timeline_profile_actions');
-	if (!actionsDropdown || !actionsDropdown.length || ($editNicknamesButton && !$.contains(actionsDropdown, $editNicknamesButton[0])))
+	var isFriends = actionsDropdown.find('.FriendButton .FriendRequestFriends');
+	if (!actionsDropdown || !actionsDropdown.length || !isFriends.length || isFriends.hasClass('hidden_elem') || 
+		($editNicknamesButton && !$.contains(actionsDropdown, $editNicknamesButton[0])))
 		return;
 
 	$editNicknamesButton = $('<span class="uiButtonGroup uiButtonGroupOverlay" id="u_0_g_namerizer"><span class="uiButtonGroupItem buttonItem firstItem lastItem"><a class="uiButton uiButtonOverlay uiButtonLarge" role="button"><span class="uiButtonText">Edit Nickname</span></a></span></span>');
