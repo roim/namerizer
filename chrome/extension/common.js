@@ -141,17 +141,16 @@ function usernameFromMessagesURL(url) {
 function fadeTextTo(node, text) {
 	if (text == $(node).text())
 		return;
-	$(node).fadeOut(200, function() {
-		$(node).text(text).fadeIn(200);
+	$(node).animate({ opacity: 0 }, 'fast', function() {
+		$(node).text(text).animate({ opacity: 1 }, 'fast');
 	});
 }
 
-var ongoingTransitions = {};
 function fadeReplaceInHtml(node, what, towhat) {
 	if ($(node).html().indexOf(what) === -1 && !$(node).is(':animated') )
 		return;
 	$(node).stop();
-	$(node).fadeOut(200, function() {
-		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).fadeIn(200);
+	$(node).animate({ opacity: 0 }, 'fast', function() {
+		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).animate({ opacity: 1 }, 'fast');
 	});
 }
