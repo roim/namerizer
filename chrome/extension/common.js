@@ -64,6 +64,7 @@ function fetchUsedNicknames() {
 		nicknameList = JSON.parse(persistentJson);
 		nicknameMap = nicknameMapFromList(nicknameList, 'username');
 		nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
+		switchNames();
 	}
 	
 	if (currentUserId && currentUserId != -1) {
@@ -72,6 +73,7 @@ function fetchUsedNicknames() {
 			nicknameMap = nicknameMapFromList(nicknameList, 'username');
 			nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
+			switchNames();
 		});
 	}
 }
