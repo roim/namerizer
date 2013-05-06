@@ -71,9 +71,9 @@ function createCommonNicknames() {
 	$(aboutContent).attr('namerized', 'true');
 	var $info = $($(aboutContent).find('ul')[0]);
 	var imgUrl = chrome.extension.getURL("commonNicknamesIcon.png");
-	var $elm = $('<li id="namerizer_nicknames" class="_4_uf"/>').appendTo($('<div class="clearfix" />').appendTo($info));
+	var $elm = $('<div class="clearfix" />').appendTo($('<li class="_4_uf" id="namerizer_nicknames"/>').appendTo($info));
 	$elm.append('<img class="_s0 _51iw _29h _29i _54rv img" width="16" height="16" alt="" src="' + imgUrl + '"/>');
-	$commonNicknamesAnchor = $('<a target="_blank" class="profileLink" href="http://namerizer.herokuapp.com/" />').appendTo(
+	$commonNicknamesAnchor = $('<a target="_blank" class="profileLink" href="http://namerizer.herokuapp.com/" data-hover="tooltip" aria-label="From Namerizer app" data-tooltip-alignh="center"/>').appendTo(
 		$('<li class="_4_ug"/>').appendTo($('<ul class="uiList _4_vp _29j _29k _513w _4kg"/>').appendTo($elm)).text('Common nicknames: ')
 	).text('-');
 	
