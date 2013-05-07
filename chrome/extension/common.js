@@ -139,15 +139,15 @@ function isProfileOwnerFriend() {
 
 function findProfileOwnerId() {
 	var columns = $('#pagelet_timeline_main_column');
-	for (var i = 0; i < columns.length; i++) {
-		var datagt = $(columns[i]).attr('data-gt');
+	columns.each(function(node) {
+		var datagt = $(node).attr('data-gt');
 		if (datagt) {
 			datagt = JSON.parse(datagt);
-			if (datagt['profile_owner']) {
-				return datagt['profile_owner'];
+			if (datagt.profile_owner) {
+				return parseInt(datagt.profile_owner);
 			}
 		}
-	}
+	});
 }
 
 var stringReplaceUtil = "#@!N%$am!@eri#@z_er_Stri_ngRe_pLa_ceUt_il!@#"
