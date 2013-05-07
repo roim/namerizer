@@ -2,7 +2,7 @@
 // Constants
 //
 
-var baseServiceAddress = "http://localhost:8080";
+var baseServiceAddress = "http://fbnamerizer.appspot.com/";
 
 //
 // Classes

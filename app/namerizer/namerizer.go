@@ -64,21 +64,21 @@ func init() {
 func addNewNickname(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	if r.Method != "POST" {
-		http.Error(w, "403: Method forbidden", 400)
+		http.Error(w, "403 method forbidden", 400)
 		return
 	}
 
 	requestBody := make([]byte, r.ContentLength)
 
 	if _, err := r.Body.Read(requestBody); err != nil {
-		http.Error(w, "400: Invalid request body", 400)
+		http.Error(w, "400 invalid request body", 400)
 		return
 	}
 
 	var nick Nickname
 
 	if err := json.Unmarshal(requestBody, &nick); err != nil {
-		http.Error(w, "400: Invalid json in request body", 400)
+		http.Error(w, "400 invalid json in request body", 400)
 		return
 	}
 
@@ -92,17 +92,17 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 
 	keys, err := q.GetAll(c, nil)
 	if err != nil {
-		http.Error(w, "500: Error querying the database", 500)
+		http.Error(w, "500 error querying the database", 500)
 		return
 	}
 
 	if err := datastore.DeleteMulti(c, keys); err != nil {
-		http.Error(w, "500: Failure removing previous entries from the database", 500)
+		http.Error(w, "500 failure removing previous entries from the database", 500)
 		return
 	}
 
 	if _, err := datastore.Put(c, datastore.NewIncompleteKey(c, "Nickname", nil), &nick); err != nil {
-		http.Error(w, "500: Could not add nickname to the database", 500)
+		http.Error(w, "500 could not add nickname to the database", 500)
 		return
 	}
 
@@ -111,7 +111,7 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	if r.Method != "GET" {
-		http.Error(w, "403: Method forbidden", 400)
+		http.Error(w, "403 method forbidden", 400)
 		return
 	}
 
@@ -119,7 +119,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(urlRegex.ReplaceAllString(r.URL.String(), ""), 10, 64)
 
 	if err != nil {
-		http.Error(w, "400: Invalid id", 400)
+		http.Error(w, "400 invalid id", 400)
 		return
 	}
 
@@ -132,14 +132,14 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	results := make([]Nickname, 0, 3000)
 
 	if _, err := q.GetAll(c, &results); err != nil {
-		http.Error(w, "500: Failure querying the databse", 500)
+		http.Error(w, "500 failure querying the databse", 500)
 		return
 	}
 
 	b, err := json.Marshal(results)
 
 	if err != nil {
-		http.Error(w, "500: Failure encoding result array to json", 500)
+		http.Error(w, "500 failure encoding result array to json", 500)
 		return
 	}
 
@@ -149,7 +149,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	if r.Method != "GET" {
-		http.Error(w, "403: Method forbidden", 400)
+		http.Error(w, "403 method forbidden", 400)
 		return
 	}
 
@@ -159,13 +159,13 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	idQtd := strings.Split(urlWithoutApiName, "?qtd=")
 
 	if len(idQtd) > 2 {
-		http.Error(w, "400: Invalid request", 400)
+		http.Error(w, "400 invalid request", 400)
 		return
 	}
 
 	id, err := strconv.ParseInt(idQtd[0], 10, 64)
 	if err != nil {
-		http.Error(w, "400: Invalid id", 400)
+		http.Error(w, "400 invalid id", 400)
 		return
 	}
 
@@ -175,7 +175,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	} else {
 		qtd, err = strconv.ParseInt(idQtd[1], 10, 64)
 		if err != nil {
-			http.Error(w, "400: Invalid qtd", 400)
+			http.Error(w, "400 invalid qtd", 400)
 			return
 		}
 	}
@@ -189,7 +189,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	nicknames := make([]Nickname, 0, 3000)
 
 	if _, err := q.GetAll(c, &nicknames); err != nil {
-		http.Error(w, "500: Failure querying the database", 500)
+		http.Error(w, "500 failure querying the database", 500)
 		return
 	}
 
@@ -204,7 +204,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(results)
 
 	if err != nil {
-		http.Error(w, "500: Failure encoding result array to json", 500)
+		http.Error(w, "500 failure encoding result array to json", 500)
 		return
 	}
 
