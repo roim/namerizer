@@ -13,8 +13,8 @@ import (
 )
 
 type Nickname struct {
-	AuthorId int64
-	TargetId int64
+	AuthorId string
+	TargetId string
 	Alias    string
 	Name     string
 	Username string
@@ -55,6 +55,11 @@ func sortMapKeysByValue(m map[string]int, qtd int) []string {
 	return keys
 }
 
+func validateInt64(n string) error {
+	_, err := strconv.ParseInt(n, 10, 64)
+	return err
+}
+
 func init() {
 	http.HandleFunc("/addNewNickname", addNewNickname)
 	http.HandleFunc("/getNicknamesForUser/", getNicknamesForUser)
@@ -75,6 +80,7 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := r.Body.Read(requestBody); err != nil {
 		http.Error(w, "400 invalid request body", 400)
+		c.Warningf(err.Error())
 		return
 	}
 
@@ -82,8 +88,23 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.Unmarshal(requestBody, &nick); err != nil {
 		http.Error(w, "400 invalid json in request body", 400)
+		c.Warningf(err.Error())
 		return
 	}
+
+	if err := validateInt64(nick.AuthorId); err != nil {
+		http.Error(w, "400 invalid AuthorId", 400)
+		c.Warningf(err.Error())
+		return
+	}
+
+	if err := validateInt64(nick.TargetId); err != nil {
+		http.Error(w, "400 invalid TargetId", 400)
+		c.Warningf(err.Error())
+		return
+	}
+
+	validateInt64(nick.TargetId)
 
 	// Process request
 	//
@@ -94,16 +115,19 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 	keys, err := q.GetAll(c, nil)
 	if err != nil {
 		http.Error(w, "500 error querying the database", 500)
+		c.Errorf(err.Error())
 		return
 	}
 
 	if err := datastore.DeleteMulti(c, keys); err != nil {
 		http.Error(w, "500 failure removing previous entries from the database", 500)
+		c.Errorf(err.Error())
 		return
 	}
 
 	if _, err := datastore.Put(c, datastore.NewIncompleteKey(c, "Nickname", nil), &nick); err != nil {
 		http.Error(w, "500 could not add nickname to the database", 500)
+		c.Errorf(err.Error())
 		return
 	}
 
@@ -115,15 +139,16 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	//
 	if r.Method != "GET" {
-		http.Error(w, "403 method forbidden", 400)
+		http.Error(w, "403 method forbidden", 403)
 		return
 	}
 
 	urlRegex, _ := regexp.Compile("^(http://fbnamerizer.appspot.com)?/getNicknamesForUser/")
-	id, err := strconv.ParseInt(urlRegex.ReplaceAllString(r.URL.String(), ""), 10, 64)
+	id := urlRegex.ReplaceAllString(r.URL.String(), "")
 
-	if err != nil {
+	if err := validateInt64(id); err != nil {
 		http.Error(w, "400 invalid id", 400)
+		c.Warningf(err.Error())
 		return
 	}
 
@@ -135,6 +160,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := q.GetAll(c, &results); err != nil {
 		http.Error(w, "500 failure querying the databse", 500)
+		c.Errorf(err.Error())
 		return
 	}
 
@@ -142,6 +168,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "500 failure encoding result array to json", 500)
+		c.Errorf(err.Error())
 		return
 	}
 
@@ -154,7 +181,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	//
 	if r.Method != "GET" {
-		http.Error(w, "403 method forbidden", 400)
+		http.Error(w, "403 method forbidden", 403)
 		return
 	}
 
@@ -162,27 +189,30 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	urlWithoutApiName := urlRegex.ReplaceAllString(r.URL.String(), "")
 
 	idQtd := strings.Split(urlWithoutApiName, "?qtd=")
+	var qtd int64
+	var idQtdErr error
 
 	if len(idQtd) > 2 {
 		http.Error(w, "400 invalid request", 400)
+		c.Warningf("More than 1 '?qtd=' tokens in request.")
 		return
-	}
-
-	id, err := strconv.ParseInt(idQtd[0], 10, 64)
-	if err != nil {
-		http.Error(w, "400 invalid id", 400)
-		return
-	}
-
-	var qtd int64
-	if len(idQtd) == 1 {
-		qtd = 3
-	} else {
-		qtd, err = strconv.ParseInt(idQtd[1], 10, 64)
-		if err != nil {
+	} else if len(idQtd) == 2 {
+		qtd, idQtdErr = strconv.ParseInt(idQtd[1], 10, 64)
+		if idQtdErr != nil {
 			http.Error(w, "400 invalid qtd", 400)
+			c.Warningf(idQtdErr.Error())
 			return
 		}
+	} else {
+		qtd = 3
+	}
+
+	id := idQtd[0]
+
+	if err := validateInt64(id); err != nil {
+		http.Error(w, "400 invalid id", 400)
+		c.Warningf(err.Error())
+		return
 	}
 
 	// Process request
@@ -193,6 +223,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := q.GetAll(c, &nicknames); err != nil {
 		http.Error(w, "500 failure querying the database", 500)
+		c.Errorf(err.Error())
 		return
 	}
 
@@ -208,6 +239,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "500 failure encoding result array to json", 500)
+		c.Errorf(err.Error())
 		return
 	}
 

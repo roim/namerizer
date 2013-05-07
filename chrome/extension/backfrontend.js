@@ -2,15 +2,15 @@
 // Constants
 //
 
-var baseServiceAddress = "http://fbnamerizer.appspot.com";
+var baseServiceAddress = "http://localhost:8080";
 
 //
 // Classes
 //
 
 function AddNicknameContract (authorId, targetId, alias, name, username) {
-	this.AuthorId = parseFloat(authorId);
-	this.TargetId = parseFloat(targetId);
+	this.AuthorId = authorId + '';
+	this.TargetId = targetId + '';
 	this.Alias    = alias;
 	this.Name     = name;
 	this.Username = username;
