@@ -2,14 +2,22 @@
 // Constants
 //
 
-var baseServiceAddress = "http://namerizer.herokuapp.com";
+var baseServiceAddress = "http://localhost:8080";
 
 //
-// Function definitions
+// Classes
 //
 
-// These should be provided by GM, but they're not supported in Chrome :(
-// Soo, if these are not defined, we implement them in the HTLM5 way. 
+function AddNicknameContract (authorId, targetId, alias, name, username) {
+	this.AuthorId = authorId;
+	this.TargetId = targetId;
+	this.Alias    = alias;
+	this.Name     = name;
+	this.Username = username;
+}
+
+//
+// Functions
 //
 
 function encodeToHex(str){
@@ -27,18 +35,19 @@ function encodeToHex(str){
 
 function processMessage(request, sender, sendResponse) {
 	if (request.code === 'userNicknames') {
-		$.get(baseServiceAddress + "/fetch/" + request.userId, sendResponse);
+		$.get(baseServiceAddress + "/getNicknamesForUser/" + request.userId, sendResponse);
 		return true;
 	} else if (request.code === 'commonNicknames') {
-		$.get(baseServiceAddress + "/fetch/suggestions/" + request.userId + '/3', sendResponse);
+		$.get(baseServiceAddress + "/getSuggestions/" + request.userId, sendResponse);
 		return true;
 	} else if (request.code === 'sendNickname') {
-		$.get(baseServiceAddress + "/fetch/create/" + 
-			request.source + '/' + 
-			request.target + '/' + 
-			encodeToHex(request.alias) + '/' + 
-			encodeToHex(request.name) + '/' + 
-			encodeToHex(request.username), sendResponse);
+		requestBody = new AddNicknameContract(
+			request.source,
+			parseFloat(request.target), 
+			encodeToHex(request.alias), 
+			encodeToHex(request.name), 
+			encodeToHex(request.username));
+		$.post(baseServiceAddress + "/addNewNickname", JSON.stringify(requestBody));
 		return true;
 	}
 	return false;

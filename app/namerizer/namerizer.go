@@ -158,7 +158,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 
 	idQtd := strings.Split(urlWithoutApiName, "?qtd=")
 
-	if len(idQtd) != 2 {
+	if len(idQtd) > 2 {
 		http.Error(w, "400: Invalid request", 400)
 		return
 	}
@@ -169,10 +169,15 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	qtd, err := strconv.ParseInt(idQtd[1], 10, 64)
-	if err != nil {
-		http.Error(w, "400: Invalid qtd", 400)
-		return
+	var qtd int64
+	if len(idQtd) == 1 {
+		qtd = 3
+	} else {
+		qtd, err = strconv.ParseInt(idQtd[1], 10, 64)
+		if err != nil {
+			http.Error(w, "400: Invalid qtd", 400)
+			return
+		}
 	}
 
 	// Process request
@@ -184,7 +189,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	nicknames := make([]Nickname, 0, 3000)
 
 	if _, err := q.GetAll(c, &nicknames); err != nil {
-		http.Error(w, "500: Failure querying the databse", 500)
+		http.Error(w, "500: Failure querying the database", 500)
 		return
 	}
 
