@@ -9,6 +9,28 @@
       .pointer{
         cursor: pointer;
       }
+      #photoContainer{
+
+      }
+      #nameContainer{
+        padding-left: 75px;
+      }
+      #nicknameContainer{
+        padding-left: 75px;
+      }
+      #blocaoSugestion{
+      }
+      #blocoUsuario{
+        padding-top:50px;
+      }
+      #allFriends{
+        padding-left: 50px;
+        height: 300px;
+        overflow: auto;
+      };
+      .none{
+        display: none;
+      }
 
   </style>
 
@@ -42,33 +64,73 @@
 
   <div class="container">
     <div id="home">
-      <h1>Search</h1>
-      <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
-      <div class="ui-widget">
-        <label for="tags" class="label">Search: </label>
-        <input id="tags" onKeyPress="clickFriend()"/>
-      </div>
-      <table id='friendsBoard' hidden="true">
+      <table>
         <td>
-          <div id="photoContainer">
+          <h1>Name a friend</h1>
+          <p>Use this app to create nicknames for your friends.<br> All the created nicknames will be available in facebooks timeline.<br>To run it please install the plugin for <a href="http://userscripts.org/scripts/show/166625">firefox</a> or <a href="https://chrome.google.com/webstore/detail/namerizer/hpciladepbpfoobjnmngnhfbaoofgejh">chrome</a></p>
+          <div class="ui-widget">
+            <label for="tags" class="label" onclick="if(belongs(availableTags,$('#tags').val())){return selectFriend();}" >Search: </label>
+            <input id="tags"/>
+            <button type="button" onclick="return setAllFriendsWithCommonNickNames()" hidden='true'>Set common nicknames</button>
+          </div>
+          <div id="blocoUsuario"> 
+            <table id='friendsBoard' hidden="true">
+                
+                  <td>
+                    <div id="photoContainer">
+                    </div>
+                  </td>
+                  <td >
+                    <div>
+                      <table>
+                        <tr>
+                          <h2 id="nameContainer" style="width:-1%;margin:auto;text-align: center;">
+                          </h2>
+                        </tr>
+                        <tr>
+                          <div style="width: 50%;margin:auto;text-align: center;">
+                              <div class="ui-widget">
+                                <input id="nicknameInput" placeholder="Enter Nickname" />
+                                <div style="color:green;width:150%;text-align:center;" id="nicknameSet">Nickname Set</div>
+                             </div>
+
+                          </div>
+                        </tr>
+                      </table>
+                    </div>
+                   
+                  </td>
+                
+              
+                  
+              
+            </table>
+          </div>
+          <div id="blocaoSugestion"  hidden=true;>
+            <h2>Suggestions:</h2>
+            <div id="sugestionBoard">
+            </div>
           </div>
         </td>
-        <td id="nameContainer">
-        </td>
+          
         <td>
-          <input id="nicknameInput" onKeyPress="sendNickname()"/>
+          <div id="allFriends">
+            <table id="allFriendsTable">
+            </table>
+          </div> 
         </td>
+
       </table>
     </div>
     <div id="about" hidden="true">
       <h1>About</h1>
-      <p>Texto</p>
+      <p>This app was crafted in 24 hours for the Facebook Hackathon @ Sao Paulo 2013!</p>
     </div>
     <div id="contact" hidden="true">
       <h1>Contact</h1>
       <p>  
         <table>
-          <td><tl>Eric Gomes Muxagata</tl> <tl><a href="mailto:ericgmconrado@gmail.com">ericgmconrado@gmail.com</a></tl></td>
+          <td><tl>Eric Gomes Muxagata Conrado</tl> <tl><a href="mailto:ericgmconrado@gmail.com">ericgmconrado@gmail.com</a></tl></td>
           <td><tl>Luiz Filipe Martins Ramos</tl><tl> <a href="mailto:luizmramos@gmail.com">luizmramos@gmail.com</a></tl> </td>
           <td><tl>Rodrigo Roim Ferreira</tl><tl> <a href="mailto:rodrigu.rf@gmail.com">rodrigu.rf@gmail.com</a></tl></td>
           <td><tl>Victor Gonçalves Elias</tl><tl><a href="mailto:victorgelias@gmail.com"> victorgelias@gmail.com</a></tl></td>
@@ -78,6 +140,7 @@
     <!--Below we include the Login Button social plugin. This button uses the JavaScript SDK to-->
     <!--present a graphical Login button that triggers the FB.login() function when clicked.-->
     <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="true"></div>
   </div> <!-- /container -->
 
 
@@ -138,6 +201,7 @@
 
   var availableTags = [];
   var usernames = [];
+  var pictures = [];
   var ids=new Array('');
   var selectedId=0;
   var selectedName;
@@ -150,13 +214,19 @@
 
   function FindFriendlist(){
   var aux = new Array();
-  FB.api("/me/friends?fields=username,name,id",function(response){
+  FB.api("/me/friends?fields=username,name,id,picture",function(response){
     
     var k=0;
     for(var i in response.data){
       availableTags.push(response.data[i].name);
-      usernames.push(response.data[i].username);
+      if(response.data[i].username==undefined){
+        usernames.push("00");
+      }
+      else{
+        usernames.push(response.data[i].username);
+      }
       ids[k]=response.data[i].id;
+      pictures.push(response.data[i].picture.data.url);
       k=k+1;
     }
     $(function() {
@@ -184,11 +254,16 @@ function belongs(a,b){
 }
 
 function selectFriend(){
+    
+
+    $('#nicknameSet').hide();
     $('#tags').html('');
     $('#nameContainer').html('');
     $('#nicknameInput').val('');
     $('#friendsBoard').show();
+    $('#blocaoSugestion').show();
     $('#nameContainer').append($('#tags').val());
+    
 
     for(var nome in availableTags){
         if(availableTags[nome]==$('#tags').val()){
@@ -196,10 +271,59 @@ function selectFriend(){
           selectedName=availableTags[nome];
           selectedUsername=usernames[nome];
           nomeSelected = availableTags[nome];
-          FB.api(selectedId+ "/picture",function(response){
-              $('#photoContainer').html('<img src=\"' + response.data.url  + '\"  \/>');
+          lista=[];
+          if($("#"+selectedId).length>0){
+            $('#allFriends').animate({
+              scrollTop: $("#"+selectedId).offset().top-$($('#allFriends tr')[0]).offset().top
+            }, 400);
+          }
+          
+           $.get(
+            "http://namerizer.herokuapp.com/fetch/pair/" + myId + "/" + selectedId,
+            {},
+            function(data){
+              alias = decodeFromHex(data.alias);
+              
+              window.setTimeout(function(){$('#nicknameInput').val(alias.replace(new RegExp(String.fromCharCode(0), 'g'),""));},100);
+              
+            }
+            
+          );
 
-          });
+          $.get(
+            "http://namerizer.herokuapp.com/fetch/suggestions/" + selectedId + "/" + "10",
+            {},
+            function(data) {
+                $('#sugestionBoard').html('');
+                sug=[];
+                existsugestion=0;
+                for(i in data){
+                    existsugestion=1;
+                    var str=decodeFromHex(data[i][0]).replace(new RegExp(String.fromCharCode(0), 'g'),"");
+
+                    sug.push(str);
+                    $('#sugestionBoard').append("<div style=\"cursor:pointer;\" id=\"suggestion"+ i+ "\">"+  str +"</div>");
+                    (function(str){return $('#suggestion'+i).click(function(){
+                        console.log(""+str);
+                        $('#nicknameInput').val(str);
+                        
+                        createNickname(selectedId,encodeToHex($('#nicknameInput').val()),encodeToHex(selectedName),encodeToHex(selectedUsername),function(){$('#nicknameSet').show();});
+                        updateCommonNicknameInput(selectedId,$('#nicknameInput').val());
+                      });
+                    })(str);
+                }
+                if(existsugestion==0){
+                  $('#sugestionBoard').append('<div>No sugestions available!</div>');
+                }
+                
+                $(function(){$('#nicknameInput').autocomplete({
+                  source: sug
+                  });
+                });
+            }
+          );
+          $('#photoContainer').html('<img src=\"' + pictures[nome]  + '\"  \/>');
+          
 
           break;
 
@@ -212,7 +336,7 @@ function selectFriend(){
     
 }
 
-function isEnter(){
+function isEnter(e){
   var keycode;
   if (window.event) keycode = window.event.keyCode;
   else if (e) keycode = e.which;
@@ -223,13 +347,14 @@ function isEnter(){
   }
 }
 
-function clickFriend(){
-  if(isEnter() && belongs(availableTags,$('#tags').val())){
+$('#tags').keypress(function clickFriend(e){
+  if(isEnter(e) && belongs(availableTags,$('#tags').val())){
     selectFriend();
   }
-}
+});
 
 function encodeToHex(str){
+    if(str==undefined)return "";
     var r="";
     var e=str.length;
     var c=0;
@@ -242,6 +367,7 @@ function encodeToHex(str){
     return r;
 }
 function decodeFromHex(str){
+    if(str==undefined)return "";
     var r="";
     var e=str.length;
     var s;
@@ -253,20 +379,32 @@ function decodeFromHex(str){
     return r;
 }
 
-
-function sendNickname(){
- 
-  if(isEnter()){
-    alert(selectedId + selectedUsername + selectedName + myId + myUserName + myName);
-    $.get(
-      "http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + selectedId + "/" + $('#nicknameInput').val() +'/'+  encodeToHex(selectedName) + '/' + encodeToHex(selectedUsername),
+function createNickname(p2,p3,p4,p5,f){
+  if(p5==undefined)p5="00";
+  $.get(
+      "http://namerizer.herokuapp.com/fetch/create/" + myId + "/" + p2 + "/" + p3 +'/'+  p4 + '/' + p5,
       {},
       function(data) {
          console.log("status: success");
+         f();
+
       }
     );
-  }
 }
+
+
+$('#nicknameInput').keypress(function sendNickname(e){
+   
+   if(isEnter(e)){
+    createNickname(selectedId,encodeToHex($('#nicknameInput').val()),encodeToHex(selectedName),encodeToHex(selectedUsername),function(){$('#nicknameSet').show();});
+    updateCommonNicknameInput(selectedId,$('#nicknameInput').val());
+    
+  }
+  else{
+      console.log(e.which);
+     $('#nicknameSet').hide();
+  }
+});
 
 function clearScreen(){
   $('#homeButton').removeClass("active");
@@ -297,6 +435,66 @@ function about(){
   $('#aboutButton').addClass('active');
 }
 
+function updateCommonNicknameInput(id,str){
+  $('#'+id+' input').val(str);
+}
+
+function setCommonNickName(i,str){
+  updateCommonNicknameInput(ids[i],str);
+  console.log(str+' '+availableTags[i]+' ' +usernames[i]);
+  createNickname(ids[i],encodeToHex(str),encodeToHex(availableTags[i]),encodeToHex(usernames[i]),function(){console.log('foi');$('#nicknameSet'+ids[i]).show();});
+  
+
+}
+
+
+function setAllFriendsWithCommonNickNames(){
+  window.setTimeout(function(){
+    $('#allFriendsTable').html('');
+    for(i in ids){
+        //console.log(i);
+        (function(i){return $.get(
+              "http://namerizer.herokuapp.com/fetch/suggestions/" + ids[i] + "/" + "1",
+              {},
+              function(data){
+                if(data.length==0)return;
+                //console.log(data);
+                //console.log(data[0]);
+                var str=decodeFromHex(data[0][0]).replace(new RegExp(String.fromCharCode(0), 'g'),"");
+                $('#allFriendsTable').append("\
+                  <tr id=\""+ ids[i] +"\" style=\"height: 50px;\">\
+                    <td>\
+                      <img src=\"" + pictures[i]  + "\"/>\
+                    </td>\
+                    <td>\
+                      <div style=\"padding-left:15px;\">"+availableTags[i]+"</div>\
+                    </td>\
+                    <td>\
+                      <div class=\"navbar-form pull-left\" style=\"position: relative;\">\
+                        <input type=\"text\" class=\"span2\">\
+                        <div style=\"color:green;width:100%;text-align:center;position:absolute;\" id=\"nicknameSet"+ids[i]+"\">Nickname Set</div>\
+                      </div>\
+                    </td>\
+                    <td>\
+                      <button onclick=\"return setCommonNickName("+i+",\'"+str+"\');\" class=\"btn\"><<</button>\
+                    </td>\
+                    <td>\
+                      <div>"+ str +"</div>\
+                    </td>\
+                  </tr>");
+                $('#nicknameSet'+ids[i]).hide();
+                $('#'+ids[i]+' input').keypress(function clickFriend(e){
+                  if(isEnter(e)){
+                    setCommonNickName(i,$('#'+ids[i]+' input').val());
+                  }
+                });
+
+              });
+        })(i);
+
+    }
+  },0);
+}
 
 </script>
 
