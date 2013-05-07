@@ -11,25 +11,25 @@ function findElementsDirectlyContainingText(ancestor, text) {
 	return array;
 }
 
-function configureNodeAnimation(parentNode, whereToReplace, target) {
+function configureNodeAnimation(parentNode, whereToReplace, name, alias) {
 	$(parentNode).on('mouseenter', function(event) {
 		if ($(parentNode).find(event.fromElement).size()) return;
 		for (var i in whereToReplace) {
 			node = whereToReplace[i];
-			fadeReplaceInHtml(node, target.alias, target.name);
+			fadeReplaceInText(node, alias, name);
 		}
 	});
 	$(parentNode).on('mouseleave', function(event) {
 		if ($(parentNode).find(event.toElement).size()) return;
 		for (var i in whereToReplace) {
 			node = whereToReplace[i];
-			fadeReplaceInHtml(node, target.name, target.alias);
+			fadeReplaceInText(node, name, alias);
 		}
 	});
 }
 
 function replaceName(parentNode, target) {
-	if(!target || $(parentNode).attr('namerized')) {
+	if(!target || $(parentNode).attr('namerized') === 'true') {
 		return false;
 	}
 	var whereToReplace = findElementsDirectlyContainingText(parentNode, target.name);
@@ -37,12 +37,12 @@ function replaceName(parentNode, target) {
 		return false;
 	for (var i in whereToReplace) {
 		node = whereToReplace[i];
-		if ($(node).html().indexOf(target.name) !== -1) {
-			$(node).html($(node).html().replace(target.name, target.alias));
+		if ($(node).text().indexOf(target.name) !== -1) {
+			$(node).text($(node).text().replace(target.name, target.alias));
 		}
 	}
 	$(parentNode).attr('namerized', 'true');
-	configureNodeAnimation(parentNode, whereToReplace, target);
+	configureNodeAnimation(parentNode, whereToReplace, target.name, target.alias);
 	return false;
 }
 
@@ -57,7 +57,7 @@ function switchNames(links) {
 		}
 
 		if (!replaceName(links[i], nicknameMap[usernameFromURL(href)])) {
-			replaceName(links[i], nicknameMapForId[usernameFromMessagesURL(href)]);
+			replaceName(links[i], nicknameMapForId[userIdFromMessagesURL(href)]);
 		}
 	}
 }

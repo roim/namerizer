@@ -116,7 +116,31 @@ function decodeFromHex(str){
     return r.replace(String.fromCharCode(0), "");
 }
 
+function arrayEquals(arr1, arr2) {
+	if (!arr1 || !arr2)
+		return arr1 === arr2;
+	return !(arr1 < arr2 || arr1 > arr2);
+}
+
 // Front front end
+
+function isProfileOwnerFriend() {
+	var isFriends = $('#pagelet_timeline_profile_actions .FriendButton .FriendRequestFriends');
+	return isFriends.length && !isFriends.hasClass('hidden_elem');
+}
+
+function findProfileOwnerId() {
+	var columns = $('#pagelet_timeline_main_column');
+	for (var i = 0; i < columns.length; i++) {
+		var datagt = $(columns[i]).attr('data-gt');
+		if (datagt) {
+			datagt = JSON.parse(datagt);
+			if (datagt['profile_owner']) {
+				return datagt['profile_owner'];
+			}
+		}
+	}
+}
 
 var stringReplaceUtil = "#@!N%$am!@eri#@z_er_Stri_ngRe_pLa_ceUt_il!@#"
 function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
@@ -134,7 +158,7 @@ function usernameFromURL(url) {
 	}
 }
 
-function usernameFromMessagesURL(url) {
+function userIdFromMessagesURL(url) {
 	return url.substring(url.lastIndexOf('/') + 1);
 }
 
@@ -146,11 +170,18 @@ function fadeTextTo(node, text) {
 	});
 }
 
-function fadeReplaceInHtml(node, what, towhat) {
-	if ($(node).html().indexOf(what) === -1 && !$(node).is(':animated') )
+function animateApplyFunction(node, callback) {
+	$(node).animate({ opacity: 0 }, 'fast', function() {
+		callback();
+		$(node).animate({ opacity: 1 }, 'fast');
+	});
+}
+
+function fadeReplaceInText(node, what, towhat) {
+	if ($(node).text().indexOf(what) === -1 && !$(node).is(':animated') )
 		return;
 	$(node).stop();
 	$(node).animate({ opacity: 0 }, 'fast', function() {
-		$(node).html(replaceOnStringExcluding($(node).html(), what, towhat, towhat)).animate({ opacity: 1 }, 'fast');
+		$(node).text(replaceOnStringExcluding($(node).text(), what, towhat, towhat)).animate({ opacity: 1 }, 'fast');
 	});
 }
