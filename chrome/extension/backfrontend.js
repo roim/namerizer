@@ -2,7 +2,7 @@
 // Constants
 //
 
-var baseServiceAddress = "http://fbnamerizer.appspot.com/";
+var baseServiceAddress = "http://fbnamerizer.appspot.com";
 
 //
 // Classes

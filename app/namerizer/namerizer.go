@@ -62,7 +62,10 @@ func init() {
 }
 
 func addNewNickname(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
 	// Validate request
+	//
 	if r.Method != "POST" {
 		http.Error(w, "403 method forbidden", 400)
 		return
@@ -83,9 +86,7 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process request
-
-	c := appengine.NewContext(r)
-
+	//
 	q := datastore.NewQuery("Nickname").Filter("AuthorId =", nick.AuthorId).Filter("TargetId =", nick.TargetId).KeysOnly()
 
 	keys := make([]*datastore.Key, 0, 3000)
@@ -109,13 +110,16 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
 	// Validate request
+	//
 	if r.Method != "GET" {
 		http.Error(w, "403 method forbidden", 400)
 		return
 	}
 
-	urlRegex, _ := regexp.Compile("^/getNicknamesForUser/")
+	urlRegex, _ := regexp.Compile("^(http://fbnamerizer.appspot.com)?/getNicknamesForUser/")
 	id, err := strconv.ParseInt(urlRegex.ReplaceAllString(r.URL.String(), ""), 10, 64)
 
 	if err != nil {
@@ -124,9 +128,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process request
-
-	c := appengine.NewContext(r)
-
+	//
 	q := datastore.NewQuery("Nickname").Filter("AuthorId =", id)
 
 	results := make([]Nickname, 0, 3000)
@@ -147,13 +149,16 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func getSuggestions(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
 	// Validate request
+	//
 	if r.Method != "GET" {
 		http.Error(w, "403 method forbidden", 400)
 		return
 	}
 
-	urlRegex, _ := regexp.Compile("^/getSuggestions/")
+	urlRegex, _ := regexp.Compile("^(http://fbnamerizer.appspot.com)?/getSuggestions/")
 	urlWithoutApiName := urlRegex.ReplaceAllString(r.URL.String(), "")
 
 	idQtd := strings.Split(urlWithoutApiName, "?qtd=")
@@ -181,9 +186,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process request
-
-	c := appengine.NewContext(r)
-
+	//
 	q := datastore.NewQuery("Nickname").Filter("TargetId =", id).Limit(3000)
 
 	nicknames := make([]Nickname, 0, 3000)
