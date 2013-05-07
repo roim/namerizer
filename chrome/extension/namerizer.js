@@ -28,7 +28,9 @@ function configureNodeAnimation(parentNode, whereToReplace, name, alias) {
 }
 
 function replaceName(parentNode, target) {
-	if(!target || ($(parentNode).attr('namerized') === 'true' && $(parentNode).html().indexOf(target.name) === -1)) {
+	if(!target || $(parentNode).attr('namerized') === 'false' ||
+		($(parentNode).attr('namerized') === 'true' 
+			&& ($(parentNode).html().indexOf(target.name) === -1 || target.alias.indexOf(target.name) !== -1)) ) {
 		return false;
 	}
 	var whereToReplace = findElementsDirectlyContainingText(parentNode, target.name);
@@ -39,8 +41,10 @@ function replaceName(parentNode, target) {
 			$(node).text($(node).text().replace(target.name, target.alias));
 		}
 	});
-	$(parentNode).attr('namerized', 'true');
-	configureNodeAnimation(parentNode, whereToReplace, target.name, target.alias);
+	if (!$(parentNode).attr('namerized')) {
+		$(parentNode).attr('namerized', 'true');
+		configureNodeAnimation(parentNode, whereToReplace, target.name, target.alias);
+	}
 	return false;
 }
 
@@ -74,7 +78,7 @@ var observer = new MutationObserver(function(mutations) {
 			}
 			// this checks the node that has been modified, we will only try to switch names on it if its already namerized or we don't care :)
 			// also, when the user hovers we change the text as well, but we change the namerized attribute to false so we won't try to swith it back either
-			if ($(mutation.target).prop('tagName') === 'A' && $(mutation.target).attr('namerized') === 'true') {
+			if ($(mutation.target).prop('tagName') === 'A') {
 				switchNames([mutation.target]);
 			}
 		}

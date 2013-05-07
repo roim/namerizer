@@ -69,11 +69,19 @@ function fetchUsedNicknames() {
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
 			nicknameList = decodeFromHexRecursive(response);
+			removeUselessNicknames(nicknameList);
 			nicknameMap = nicknameMapFromList(nicknameList, 'username');
 			nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 			switchNames();
 		});
+	}
+}
+
+function removeUselessNicknames(list) {
+	for(var i in list) {
+		if (list[i].username && list[i].name == list[i].alias)
+			delete list[i];
 	}
 }
 
