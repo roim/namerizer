@@ -9,8 +9,8 @@ var baseServiceAddress = "http://localhost:8080";
 //
 
 function AddNicknameContract (authorId, targetId, alias, name, username) {
-	this.AuthorId = authorId;
-	this.TargetId = targetId;
+	this.AuthorId = parseFloat(authorId);
+	this.TargetId = parseFloat(targetId);
 	this.Alias    = alias;
 	this.Name     = name;
 	this.Username = username;
@@ -43,7 +43,7 @@ function processMessage(request, sender, sendResponse) {
 	} else if (request.code === 'sendNickname') {
 		requestBody = new AddNicknameContract(
 			request.source,
-			parseFloat(request.target), 
+			request.target, 
 			encodeToHex(request.alias), 
 			encodeToHex(request.name), 
 			encodeToHex(request.username));
