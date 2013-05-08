@@ -100,7 +100,7 @@ function createCommonNicknames() {
 	if (!commonNicknames[currentProfileUsername]) {
 		var target = nicknameMap[currentProfileUsername];
 		if (target)
-			commonNicknames[currentProfileUsername] = target.alias;
+			commonNicknames[currentProfileUsername] = [target.alias];
 	}
 	if (commonNicknames[currentProfileUsername])
 		updatecommonNicknamesSpan(commonNicknames[currentProfileUsername]);
