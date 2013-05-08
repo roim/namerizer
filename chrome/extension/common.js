@@ -110,12 +110,10 @@ function removeUselessNicknames(list) {
 }
 
 function nicknameMapFromList(list, key) {
-	if (!key)
-		key = 'username';
 	var map = {};
 	fastForEach(list, function(elm) {
 		if (elm && key in elm)
-			map[elm[key].toString()] = list[i];
+			map[elm[key].toString()] = elm;
 	});
 	return map;
 }
@@ -164,15 +162,17 @@ function isProfileOwnerFriend() {
 
 function findProfileOwnerId() {
 	var columns = $('#pagelet_timeline_main_column');
-	columns.each(function(node) {
+	var userId;
+	fastForEach(columns, function(node) {
 		var datagt = $(node).attr('data-gt');
 		if (datagt) {
 			datagt = JSON.parse(datagt);
 			if (datagt.profile_owner) {
-				return parseInt(datagt.profile_owner);
+				userId = parseInt(datagt.profile_owner);
 			}
 		}
 	});
+	return userId;
 }
 
 var stringReplaceUtil = "#@!N%$am!@eri#@z_er_Stri_ngRe_pLa_ceUt_il!@#"
