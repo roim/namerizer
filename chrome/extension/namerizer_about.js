@@ -4,8 +4,10 @@ function fetchCommonNicknames(data, callback) {
 	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
 	if (persistentJson) {
 		var parsedJSON = JSON.parse(persistentJson);
-		if (!arrayEquals(commonNicknames[data.username], parsedJSON[data.username]) && callback)
+		if (!arrayEquals(commonNicknames[data.username], parsedJSON[data.username]) && callback) {
+			commonNicknames[data.username] = parsedJSON[data.username];
 			callback(parsedJSON[data.username], 'cache');
+		}
 		if (!arrayEquals(commonNicknames, parsedJSON))
 			commonNicknames = parsedJSON;
 	}
@@ -88,21 +90,20 @@ function createCommonNicknames() {
 	
 	$(aboutContent).attr('namerized', 'true');
 	var $info = $($(aboutContent).find('ul')[0]);
-	var imgUrl = chrome.extension.getURL("commonNicknamesIcon.png");
+	var imgUrl = chrome.extension.getURL("images/commonNicknamesIcon.png");
 	var $elm = $('<div class="clearfix" />').appendTo($('<li class="_4_uf" id="namerizer_nicknames"/>').appendTo($info));
 	$elm.append('<img class="_s0 _51iw _29h _29i _54rv img" width="16" height="16" alt="" src="' + imgUrl + '"/>');
 	$commonNicknamesSpan = $('<span/>').appendTo(
 		$('<li class="_4_ug"/>').appendTo($('<ul class="uiList _4_vp _29j _29k _513w _4kg"/>').appendTo($elm)).text('Common nicknames: ')
 	).text('-');
 		
-	if (commonNicknames[currentProfileUsername]) {
-		updatecommonNicknamesSpan(commonNicknames[currentProfileUsername]);
-	} else {
+	if (!commonNicknames[currentProfileUsername]) {
 		var target = nicknameMap[currentProfileUsername];
-		if (target) {
-			updatecommonNicknamesSpan([target.alias]);
-		}
+		if (target)
+			commonNicknames[currentProfileUsername] = target.alias;
 	}
+	if (commonNicknames[currentProfileUsername])
+		updatecommonNicknamesSpan(commonNicknames[currentProfileUsername]);
 
 	fetchCommonNicknames({userId: findProfileOwnerId(), username: currentProfileUsername}, function(response, origin) {
 		if (origin == 'cache') {
