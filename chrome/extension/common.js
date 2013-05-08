@@ -117,9 +117,10 @@ function nicknameMapFromList(list, key) {
 	if (!key)
 		key = 'username';
 	var map = {};
-	for (var i in list)
-		if (list[i][key])
-			map[list[i][key].toString()] = list[i];
+	fastForEach(list, function(elm) {
+		if (elm && key in elm)
+			map[elm[key].toString()] = list[i];
+	});
 	return map;
 }
 
