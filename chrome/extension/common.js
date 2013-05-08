@@ -54,28 +54,32 @@ function fastForEach(collection, callback, forThis) {
 
 // finding current user ID
 function parseCurrentUserId() {
-	if (!currentUserId) {
-		var qResult = $("#sidebar_navigation_top a");
-		if (qResult.length)
-			currentUserId = parseInt(qResult.attr("data-id"));
-	}
-	if (!currentUserId) {
-		qResult = $(".headerTinymanPhoto");
-		if (qResult.length)
-			currentUserId = parseInt(qResult.attr("id").match(/\d+/)[0]);
-	}
-	if (!currentUserId) {
+	if ($("html").html().length < 300) {
 		setTimeout(parseCurrentUserId, 100);
 		return;
 	}
+	
+	var beginOfHtml = $("html").html().substring(0, 300);
+	if (beginOfHtml[7] == 'm') {
+		var begin = beginOfHtml.indexOf("user") + 7;
+		var end = beginOfHtml.indexOf('",');
 
-	if (GM_getValue(cacheKeys.currentUserId) != currentUserId) {
-		for (i in cacheKeys) {
-			GM_deleteValue(cacheKeys[i]);
+		if (begin != -1 && end != -1) {
+			var userIdString = beginOfHtml.substring(begin, end);
+			currentUserId = parseInt(userIdString);
 		}
-		GM_setValue(cacheKeys.currentUserId, currentUserId);
 	}
-	fetchUsedNicknames();
+	if (!currentUserId) {
+		currentUserId = -1;
+	} else {		
+		if (GM_getValue(cacheKeys.currentUserId) != currentUserId) {
+			for (i in cacheKeys) {
+				GM_deleteValue(cacheKeys[i]);
+			}
+			GM_setValue(cacheKeys.currentUserId, currentUserId);
+		}
+		fetchUsedNicknames();
+	}
 }
 parseCurrentUserId();
 
