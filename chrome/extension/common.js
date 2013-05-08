@@ -9,7 +9,7 @@ var cacheKeys = {
 // Globals
 var nicknameMap = {};
 var nicknameMapForId = {};
-var nicknameList = {};
+var nicknameList = [];
 
  // for local cache
 if (!this.GM_getValue || (this.GM_getValue.toString && this.GM_getValue.toString().indexOf("not supported")>-1)) {
@@ -17,7 +17,8 @@ if (!this.GM_getValue || (this.GM_getValue.toString && this.GM_getValue.toString
       return localStorage[key] || def;
   };
   this.GM_setValue=function (key,value) {
-      return localStorage[key]=value;
+  		if ( typeof value === "undefined" ) return;
+    	return localStorage[key]=value;
   };
   this.GM_deleteValue=function (key) {
       return delete localStorage[key];
@@ -58,7 +59,7 @@ parseCurrentUserId();
 // talking to back front end
 
 function fetchUsedNicknames() {
-	var persistentJson = GM_getValue(cacheKeys.userNicknames);
+	var persistentJson = GM_getValue(cacheKeys.userNicknames, "");
 	if (persistentJson) {
 		nicknameList = JSON.parse(persistentJson);
 		nicknameMap = nicknameMapFromList(nicknameList, 'username');
@@ -68,13 +69,15 @@ function fetchUsedNicknames() {
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
-			nicknameList = decodeFromHexRecursive(response);
+			nicknameList = response;
 			nicknameMap = nicknameMapFromList(nicknameList, 'username');
 			nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
 			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 			switchNames();
 		});
 	}
+
+	if (!(nicknameList instanceof Array)) nicknameList = [];
 }
 
 function nicknameMapFromList(list, key) {
@@ -85,35 +88,6 @@ function nicknameMapFromList(list, key) {
 		if (list[i][key])
 			map[list[i][key].toString()] = list[i];
 	return map;
-}
-
-function decodeFromHexRecursive(obj) {
-	if (typeof obj === "string")
-		return decodeFromHex(obj);
-	var newObj;
-	if (Object.prototype.toString.call(obj) === '[object Array]')
-		newObj = [];
-	else
-		newObj = {};
-	for (var i in obj) {
-		newObj[i] = decodeFromHexRecursive(obj[i]);
-	}
-	for (var i in newObj) {
-		return newObj;
-	}
-	return obj;
-}
-
-function decodeFromHex(str){
-    var r="";
-    var e=str.length;
-    var s;
-    while(e>=0){
-        s=e-3;
-        r=String.fromCharCode("0x"+str.substring(s,e))+r;
-        e=s;
-    }
-    return r.replace(String.fromCharCode(0), "");
 }
 
 function arrayEquals(arr1, arr2) {

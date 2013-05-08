@@ -1,7 +1,7 @@
 var commonNicknames = {};
 
 function fetchCommonNicknames(data, callback) {
-	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
+	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser, undefined);
 	if (persistentJson) {
 		var parsedJSON = JSON.parse(persistentJson);
 		if (!arrayEquals(commonNicknames[data.username], parsedJSON[data.username]) && callback)
@@ -23,8 +23,9 @@ function fetchCommonNicknames(data, callback) {
 
 function commonNicknamesFromResponse(response) {
 	var nicknames = [];
+	if (typeof response === "undefined") return nicknames;
 	for (var i = 0; i < response.length; i++) {
-		nicknames.push(decodeFromHex(response[i][0]));
+		nicknames.push(response[i][0]);
 	}
 	return nicknames;
 }

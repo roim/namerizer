@@ -83,22 +83,10 @@ function updateMemoryCache (jsonContent) {
 	nicknameList = JSON.parse(jsonContent);
 
 	for (var i in nicknameList) {
-		nicknameList[i].username = decodeFromHex(nicknameList[i].username);
-		nicknameList[i].name = decodeFromHex(nicknameList[i].name);
-		nicknameList[i].alias = decodeFromHex(nicknameList[i].alias);
+		nicknameList[i].username = nicknameList[i].username;
+		nicknameList[i].name = nicknameList[i].name;
+		nicknameList[i].alias = nicknameList[i].alias;
 	};
-}
-
-function decodeFromHex(str){
-    var r="";
-    var e=str.length;
-    var s;
-    while(e>=0){
-        s=e-3;
-        r=String.fromCharCode("0x"+str.substring(s,e))+r;
-        e=s;
-    }
-    return r.replace(String.fromCharCode(0), "");
 }
 
 var userId = idNotFound;
@@ -249,9 +237,9 @@ function updateCommonNicknames(response) {
 		commonNicks = "-";
 	}
 	else {
-		commonNicks = decodeFromHex(array[array.length - 1][0]);
+		commonNicks = array[array.length - 1][0];
 		for (var i = array.length - 2; i >= 0; i--) {
-			commonNicks += ', ' + decodeFromHex(array[i][0]);
+			commonNicks += ', ' + array[i][0];
 		}
 	}
 	fadeTextTo(commonNicknamesAnchor, commonNicks);

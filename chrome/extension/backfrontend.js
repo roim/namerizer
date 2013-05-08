@@ -1,37 +1,24 @@
 //
-// Constants
+// ConstantsGM
 //
 
-var baseServiceAddress = "http://localhost:8080";
+var baseServiceAddress = "http://fbnamerizer.appspot.com";
 
 //
 // Classes
 //
 
 function AddNicknameContract (authorId, targetId, alias, name, username) {
-	this.AuthorId = authorId + '';
-	this.TargetId = targetId + '';
-	this.Alias    = alias;
-	this.Name     = name;
-	this.Username = username;
+	this.source   = authorId + '';
+	this.target   = targetId + '';
+	this.alias    = alias;
+	this.name     = name;
+	this.username = username;
 }
 
 //
 // Functions
 //
-
-function encodeToHex(str){
-    var r="";
-    var e=str.length;
-    var c=0;
-    var h;
-    while(c<e){
-        h=str.charCodeAt(c++).toString(16);
-        while(h.length<3) h="0"+h;
-        r+=h;
-    }
-    return r;
-}
 
 function processMessage(request, sender, sendResponse) {
 	if (request.code === 'userNicknames') {
@@ -44,9 +31,9 @@ function processMessage(request, sender, sendResponse) {
 		requestBody = new AddNicknameContract(
 			request.source,
 			request.target, 
-			encodeToHex(request.alias), 
-			encodeToHex(request.name), 
-			encodeToHex(request.username));
+			request.alias, 
+			request.name, 
+			request.username);
 		$.post(baseServiceAddress + "/addNewNickname", JSON.stringify(requestBody));
 		return true;
 	}

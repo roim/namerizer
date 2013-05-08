@@ -13,11 +13,11 @@ import (
 )
 
 type Nickname struct {
-	AuthorId string
-	TargetId string
-	Alias    string
-	Name     string
-	Username string
+	SourceId string `json:"source"`
+	TargetId string `json:"target"`
+	Alias    string `json:"alias"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
 }
 
 type Pair struct {
@@ -92,8 +92,8 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validateInt64(nick.AuthorId); err != nil {
-		http.Error(w, "400 invalid AuthorId", 400)
+	if err := validateInt64(nick.SourceId); err != nil {
+		http.Error(w, "400 invalid SourceId", 400)
 		c.Warningf(err.Error())
 		return
 	}
@@ -104,11 +104,9 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validateInt64(nick.TargetId)
-
 	// Process request
 	//
-	q := datastore.NewQuery("Nickname").Filter("AuthorId =", nick.AuthorId).Filter("TargetId =", nick.TargetId).KeysOnly()
+	q := datastore.NewQuery("Nickname").Filter("SourceId =", nick.SourceId).Filter("TargetId =", nick.TargetId).KeysOnly()
 
 	keys := make([]*datastore.Key, 0, 3000)
 
@@ -154,7 +152,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 
 	// Process request
 	//
-	q := datastore.NewQuery("Nickname").Filter("AuthorId =", id)
+	q := datastore.NewQuery("Nickname").Filter("SourceId =", id)
 
 	results := make([]Nickname, 0, 3000)
 
