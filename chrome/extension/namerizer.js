@@ -52,30 +52,29 @@ function replaceName(parentNode, target) {
 function switchNames(links) {
 	if (!links)
 		links = $('a');
-	for (var i = 0; i < links.length; i++) {
-		var href = links[i].href;
+	fastForEach(links, function(elm) {
+		var href = elm.href;
 		if (!href) {
-		  continue;
+		  return;
 		}
 
-		if (!replaceName(links[i], nicknameMap[usernameFromURL(href)])) {
-			replaceName(links[i], nicknameMapForId[userIdFromMessagesURL(href)]);
+		if (!replaceName(elm, nicknameMap[usernameFromURL(href)])) {
+			replaceName(elm, nicknameMapForId[userIdFromMessagesURL(href)]);
 		}
-	}
+	});
 }
 
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 var observer = new MutationObserver(function(mutations) {
-	mutations.forEach(function(mutation) {
+	fastForEach(mutations, function(mutation) {
 		if (mutation.type == 'childList' && mutation.addedNodes) {
-			var addedNodes = mutation.addedNodes;
-			for (var j = 0; j < addedNodes.length; j++) {
-				switchNames($(addedNodes[j]).find('a'));
-				if ($(addedNodes[j]).prop('tagName') === 'A') {
-					switchNames([addedNodes[j]]);
+			fastForEach(mutation.addedNodes, function(node) {
+				switchNames($(node).find('a'));
+				if ($(node).prop('tagName') === 'A') {
+					switchNames([node]);
 				}
-			}
+			});
 			// this checks the node that has been modified, we will only try to switch names on it if its already namerized or we don't care :)
 			// also, when the user hovers we change the text as well, but we change the namerized attribute to false so we won't try to swith it back either
 			if ($(mutation.target).prop('tagName') === 'A') {

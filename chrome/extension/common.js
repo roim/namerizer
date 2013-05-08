@@ -24,6 +24,34 @@ if (!this.GM_getValue || (this.GM_getValue.toString && this.GM_getValue.toString
   };
 }
 
+// cool things
+
+function isArraylike( obj ) {
+	var length = obj.length,
+		type = typeof obj;
+
+	return type === "array" || type !== "function" &&
+		( length === 0 ||
+		(typeof length === "number" && length > 0 && ( length - 1 ) in obj ));
+}
+
+function fastForEach(collection, callback, forThis) {
+	if (isArraylike(collection)) {
+		if (Array.prototype.forEach) {
+			Array.prototype.forEach.call(collection, callback, forThis);
+		} else {
+			for (var i = collection.length - 1; i >= 0; --i) {
+				if (i in collection)
+					callback.call(forThis, collection[i], i, collection);
+			}
+		}
+	} else {
+		for (var i in collection) {
+			callback.call(forThis, collection[i], i, collection);
+		}
+	}
+}
+
 // finding current user ID
 function parseCurrentUserId() {
 	if ($("html").html().length < 300) {
@@ -79,10 +107,10 @@ function fetchUsedNicknames() {
 }
 
 function removeUselessNicknames(list) {
-	for(var i in list) {
-		if (list[i].username && list[i].name == list[i].alias)
-			delete list[i];
-	}
+	fastForEach(list, function(elm, i) {
+		if (elm.username && elm.name == elm.alias)
+			list.splice(i, 1);
+	});
 }
 
 function nicknameMapFromList(list, key) {
