@@ -66,7 +66,7 @@ function parseCurrentUserId() {
 
 		if (begin != -1 && end != -1) {
 			var userIdString = beginOfHtml.substring(begin, end);
-			currentUserId = parseInt(userIdString);
+			currentUserId = userIdString;
 		}
 	}
 	if (!currentUserId) {
@@ -172,7 +172,7 @@ function findProfileOwnerId() {
 		if (datagt) {
 			datagt = JSON.parse(datagt);
 			if (datagt.profile_owner) {
-				userId = parseInt(datagt.profile_owner);
+				userId = datagt.profile_owner;
 			}
 		}
 	});
