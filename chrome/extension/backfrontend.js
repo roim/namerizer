@@ -3,6 +3,8 @@
 //
 
 var baseServiceAddress = "http://namerizer.herokuapp.com";
+var fbAccessTokenUrl = "https://www.facebook.com/dialog/oauth?client_id=270360863061196&response_type=token&scope=email&redirect_uri=https://www.facebook.com/connect/login_success.html";
+var fbSuccessURL= "www.facebook.com/connect/login_success.html"
 var graphBaseServiceAddress = "http://graph.facebook.com";
 
 //
@@ -25,6 +27,43 @@ function encodeToHex(str){
     }
     return r;
 }
+
+//facebook
+
+var authTab;
+function onChromeTabUpdate(updatedTabId, changeInfo, tab) {
+	if (updatedTabId === authTab.id && changeInfo.url && changeInfo.url.indexOf(fbSuccessURL) !== -1) {
+		var argsMap = getArgsFromUrl(changeInfo.url);
+		if (argsMap['access_token']) {
+			chrome.tabs.remove(authTab.id);
+			chrome.tabs.onUpdated.removeListener(onChromeTabUpdate);
+		}
+		else;
+	}
+}
+
+chrome.browserAction.onClicked.addListener(function(activeTab)
+{
+    var newURL = "http://www.youtube.com/watch?v=oHg5SJYRHA0";
+    chrome.tabs.create({ url: fbAccessTokenUrl, active: false}, function(newTab) {
+    	authTab = newTab;
+		chrome.tabs.onUpdated.addListener(onChromeTabUpdate);
+    });
+});
+
+
+function getArgsFromUrl(url) {
+    var params = url.substring(url.indexOf('#') + 1);
+    var args = params.split('&');
+    var map = {};
+    for (var i in args) {
+        var pair = args[i].split('=');
+        map[pair[0]] = pair[1];
+    }
+    return map;
+}
+
+// communication with tabs
 
 function processMessage(request, sender, sendResponse) {
 	if (request.code === 'userNicknames') {
