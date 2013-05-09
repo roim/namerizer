@@ -96,14 +96,30 @@ function fetchUsedNicknames() {
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
-			nicknameList = decodeFromHexRecursive(response);
-			removeUselessNicknames(nicknameList);
-			nicknameMap = nicknameMapFromList(nicknameList, 'username');
-			nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
-			GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
-			switchNames();
+			var preNicknameList = decodeFromHexRecursive(response);
+			var preNicknameMapForId = nicknameMapFromList(preNicknameList, 'target');
+			var uids = [];
+			for (var i in preNicknameList)
+				uids.push(preNicknameList[i].target);
+			fetchFacebookDataFromIds({userIds: uids}, function(fbResponse) {
+				if(fbResponse.data)
+					for (var i in fbResponse.data) {
+						preNicknameMapForId[fbResponse.data[i].uid].username = fbResponse.data[i].username;
+						preNicknameMapForId[fbResponse.data[i].uid].name = fbResponse.data[i].name;
+					}
+				nicknameList = removeUselessNicknames(preNicknameList);
+				nicknameMap = nicknameMapFromList(nicknameList, 'username');
+				nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
+				GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
+				switchNames();
+			});
 		});
 	}
+}
+
+function fetchFacebookDataFromIds(request, callback) {
+	request.code = 'facebookData';
+	chrome.runtime.sendMessage(request, callback);
 }
 
 function removeUselessNicknames(list) {

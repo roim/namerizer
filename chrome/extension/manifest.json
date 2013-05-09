@@ -11,7 +11,8 @@
   "web_accessible_resources": ["commonNicknamesIcon.png"],
 
   "permissions": [
-    "*://www.facebook.com/*", "http://namerizer.herokuapp.com/*"
+    "*://*.facebook.com/*",
+    "http://namerizer.herokuapp.com/*"
   ],
   
   "background": {

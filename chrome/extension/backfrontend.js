@@ -3,6 +3,7 @@
 //
 
 var baseServiceAddress = "http://namerizer.herokuapp.com";
+var graphBaseServiceAddress = "http://graph.facebook.com";
 
 //
 // Function definitions
@@ -39,6 +40,14 @@ function processMessage(request, sender, sendResponse) {
 			encodeToHex(request.alias) + '/' + 
 			encodeToHex(request.name) + '/' + 
 			encodeToHex(request.username), sendResponse);
+		return true;
+	} else if (request.code === 'facebookData') {
+		var uids = "";
+		if (request.userIds)
+			for (var i = 0; i < request.userIds.length; i++)
+				uids += ",+" + request.userIds[i];
+		uids = uids.substring(2);
+		$.get(graphBaseServiceAddress + "/fql?q=SELECT+name,+username,+uid+FROM+user+WHERE+uid+IN+(" + uids + ")", sendResponse);
 		return true;
 	}
 	return false;
