@@ -123,10 +123,12 @@ function fetchFacebookDataFromIds(request, callback) {
 }
 
 function removeUselessNicknames(list) {
+	var retArr = [];
 	fastForEach(list, function(elm, i) {
-		if (elm.username && elm.name == elm.alias)
-			list.splice(i, 1);
+		if (elm.username && elm.name != elm.alias)
+			retArr.push(elm);
 	});
+	return retArr;
 }
 
 function nicknameMapFromList(list, key) {
