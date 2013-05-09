@@ -1,0 +1,9 @@
+#facebook_load_frame {
+	width:1px;
+	height:1px;
+	border:0;
+	position:absolute;
+	top:0;
+	left:0;
+	display:none;
+}
