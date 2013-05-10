@@ -3,6 +3,7 @@
 //
 
 var baseServiceAddress = "http://fbnamerizer.appspot.com";
+var graphBaseServiceAddress = "http://graph.facebook.com";
 
 //
 // Classes
@@ -35,6 +36,14 @@ function processMessage(request, sender, sendResponse) {
 			request.name, 
 			request.username);
 		$.post(baseServiceAddress + "/addNewNickname", JSON.stringify(requestBody));
+		return true;
+	} else if (request.code === 'facebookData') {
+		var uids = "";
+		if (request.userIds)
+			for (var i = 0; i < request.userIds.length; i++)
+				uids += ",+" + request.userIds[i];
+		uids = uids.substring(2);
+		$.get(graphBaseServiceAddress + "/fql?q=SELECT+name,username,uid+FROM+user+WHERE+uid+IN+(" + uids + ")", sendResponse);
 		return true;
 	}
 	return false;

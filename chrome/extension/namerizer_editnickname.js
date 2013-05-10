@@ -1,28 +1,18 @@
 var $editNicknamesButton;
 
-function sendNicknameToServer(data, callback) {
-	var target = nicknameMap[data.username];
+function sendNicknameToServer(params, callback) {
+	var target = nicknameMapForId[params.target];
+	var unswitchedNodes;
 	if (target) {
-		$('a[namerized="true"]').each(function(i, node) {
-			var href = $(node).attr('href');
-			if (usernameFromURL(href) === target.username || userIdFromMessagesURL(href) == target.target) {
-				$(node).html(replaceOnStringExcluding($(node).html(), target.alias, target.name, target.name));
-				$(node).removeAttr('namerized');
-			}
-
-		});
-		target.alias = data.alias;
-		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
-		switchNames();
+		unswitchedNodes = unswitchNames(target);
+		target.alias = params.alias;
 	} else {
-		target = nicknameMap[data.username] = data;
+		target = nicknameMapForId[params.target] = nicknameMapForUsername[params.username] = params;
 		nicknameList.push(target);
-		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
-		switchNames();
 	}
+	switchNames(unswitchedNodes); // if it's undefined the function will just search on every anchor
 
-	data.code = "sendNickname";
-	chrome.runtime.sendMessage(data, function(response) {
+	chrome.runtime.sendMessage(params, function(response) {
 		if (callback)
 			callback(response);
 		fetchUsedNicknames();
@@ -47,7 +37,7 @@ function selectText(element) {
 
 function editNickname() {
 	var $profileName = $('#fbProfileCover .cover div a');
-	var target = nicknameMap[usernameFromURL($profileName.attr('href'))];
+	var target = targetFromURL($profileName.attr('href'));
 	var $clone = $profileName.clone().removeAttr('href').wrap('<div contentEditable="true"/>');
 	var $editNicknameDiv = $clone.parent();
 	$editNicknameDiv.keypress(function(e) {
@@ -55,17 +45,17 @@ function editNickname() {
 			$editNicknameDiv.remove();
 			$profileName.show();
 			var alternateName = $profileName.find('.alternate_name');
-			sendNicknameToServer({
-				source: currentUserId, 
-				target: findProfileOwnerId(), 
-				alias: $editNicknameDiv.text(),
-				name: 
-					target ? target.name : (
-						alternateName ? 
-							$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : 
-							$profileName.text()),
-				username: currentProfileUsername
-			});
+			var name = target ? target.name : (
+					alternateName ?
+						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : // remove alternate name then trim
+						$profileName.text());
+			sendNicknameToServer(new SendNicknameParameters(
+				currentUserId,          // source
+				findProfileOwnerId(),   // target
+				$editNicknameDiv.text(),// alias
+				name,                   // name
+				currentProfileUsername  // username
+			));
 			return false;
 		}
 	});

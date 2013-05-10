@@ -4,15 +4,17 @@ function fetchCommonNicknames(data, callback) {
 	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser, undefined);
 	if (persistentJson) {
 		var parsedJSON = JSON.parse(persistentJson);
-		if (!arrayEquals(commonNicknames[data.username], parsedJSON[data.username]) && callback)
-			callback(parsedJSON[data.username], 'cache');
+		if (parsedJSON[data.userId] && !commonNicknames[data.userId] && callback) {
+			commonNicknames[data.userId] = parsedJSON[data.userId];
+			callback(parsedJSON[data.userId], 'cache');
+		}
 		if (!arrayEquals(commonNicknames, parsedJSON))
 			commonNicknames = parsedJSON;
 	}
 	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
 			var nicknames = commonNicknamesFromResponse(response);
-			if (!arrayEquals(commonNicknames[data.username], nicknames)) {
-				commonNicknames[data.username] = nicknames;
+			if (!arrayEquals(commonNicknames[data.userId], nicknames)) {
+				commonNicknames[data.userId] = nicknames;
 				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
 				if (callback) {
 					callback(nicknames, 'server');
@@ -38,23 +40,23 @@ function anchorFromAlias(alias) {
 
 	return $('<a class="profileLink" data-hover="tooltip" aria-label="Use this nickname" data-tooltip-alignh="center"/>').text(alias).click(function() {
 		var $profileName = $('#fbProfileCover .cover div a');
+		var target = targetFromURL($profileName.attr('href'));
 		var alternateName = $profileName.find('.alternate_name');
-		var target = nicknameMap[usernameFromURL($profileName.attr('href'))];
-		sendNicknameToServer({
-			source: currentUserId, 
-			target: findProfileOwnerId(), 
-			alias: alias,
-			name: 
-				target ? target.name : (
-					alternateName ? 
-						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : 
-						$profileName.text()),
-			username: currentProfileUsername
-		});
+		var name = target ? target.name : (
+					alternateName ?
+						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : // remove alternate name then trim
+						$profileName.text());
+		sendNicknameToServer(new SendNicknameParameters(
+			currentUserId,          // source
+			findProfileOwnerId(),   // target
+			alias,                  // alias
+			name,                   // name
+			currentProfileUsername  // username
+		));
 	});
 }
 
-function updatecommonNicknamesSpan(nicknameList) {
+function updateCommonNicknamesSpan(nicknameList) {
 	if (!nicknameList.length) {
 		$commonNicknamesSpan.text('-');
 		return;
@@ -89,28 +91,29 @@ function createCommonNicknames() {
 	
 	$(aboutContent).attr('namerized', 'true');
 	var $info = $($(aboutContent).find('ul')[0]);
-	var imgUrl = chrome.extension.getURL("commonNicknamesIcon.png");
-	var $elm = $('<div class="clearfix" />').appendTo($('<li class="_4_uf" id="namerizer_nicknames"/>').appendTo($info));
-	$elm.append('<img class="_s0 _51iw _29h _29i _54rv img" width="16" height="16" alt="" src="' + imgUrl + '"/>');
+	var $elm = $info.children().last().clone().attr('id', 'namerizer_nicknames');
+	$elm.find('img').attr('src', chrome.extension.getURL("images/commonNicknamesIcon.png"));
+	$elm.find('li').text('Common nicknames: ');
 	$commonNicknamesSpan = $('<span/>').appendTo(
-		$('<li class="_4_ug"/>').appendTo($('<ul class="uiList _4_vp _29j _29k _513w _4kg"/>').appendTo($elm)).text('Common nicknames: ')
+		$elm.find('li').text('Common nicknames: ')
 	).text('-');
-		
-	if (commonNicknames[currentProfileUsername]) {
-		updatecommonNicknamesSpan(commonNicknames[currentProfileUsername]);
-	} else {
-		var target = nicknameMap[currentProfileUsername];
-		if (target) {
-			updatecommonNicknamesSpan([target.alias]);
-		}
-	}
+	$info.append($elm);
 
-	fetchCommonNicknames({userId: findProfileOwnerId(), username: currentProfileUsername}, function(response, origin) {
+	var profileOwnerId = findProfileOwnerId();
+	if (!commonNicknames[profileOwnerId]) {
+		var target = nicknameMapForId[profileOwnerId];
+		if (target)
+			commonNicknames[profileOwnerId] = [target.alias];
+	}
+	if (commonNicknames[profileOwnerId])
+		updateCommonNicknamesSpan(commonNicknames[profileOwnerId]);
+
+	fetchCommonNicknames({userId: profileOwnerId}, function(response, origin) {
 		if (origin == 'cache') {
-			updatecommonNicknamesSpan(response);
+			updateCommonNicknamesSpan(response);
 		}
 		else {
-			animateApplyFunction($commonNicknamesSpan, function() {updatecommonNicknamesSpan(response)});
+			animateApplyFunction($commonNicknamesSpan, function() {updateCommonNicknamesSpan(response)});
 		}
 	});
 }
