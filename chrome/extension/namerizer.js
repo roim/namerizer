@@ -45,7 +45,7 @@ function replaceName(parentNode, target) {
 		$(parentNode).attr('namerized', 'true');
 		configureNodeAnimation(parentNode, whereToReplace, target.name, target.alias);
 	}
-	return false;
+	return true;
 }
 
 
@@ -57,10 +57,7 @@ function switchNames(links) {
 		if (!href) {
 		  return;
 		}
-
-		if (!replaceName(elm, nicknameMap[usernameFromURL(href)])) {
-			replaceName(elm, nicknameMapForId[userIdFromMessagesURL(href)]);
-		}
+		replaceName(elm, targetFromURL(href));
 	});
 }
 

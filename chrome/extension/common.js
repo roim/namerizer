@@ -205,16 +205,39 @@ function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
 		return where.replace(what, towhat);
 }
 
+function targetFromURL(url) {
+	if (target = nicknameMap[usernameFromURL(url)])
+		return target;
+	if (target = nicknameMapForId[userIdFromURL(url)])
+		return target;
+	if (target = nicknameMapForId[userIdFromMessagesURL(url)])
+		return target;
+	if (target = nicknameMap[usernameFromMessagesURL(url)])
+		return target;
+}
+
 function usernameFromURL(url) {
-	if (url.indexOf('?') != -1) {
-		return url.substring(url.indexOf('www.facebook.com/') + 17, url.indexOf('?'));
-	} else {
-		return url.substring(url.indexOf('www.facebook.com/') + 17);
-	}
+	var match = url.match(/[^\/]\/{1}([A-z0-9\.]{5,})/);
+	if (match)
+		return match[1];
+}
+
+function userIdFromURL(url) {
+	var match = url.match(/id=([0-9]+)/);
+	if (match)
+		return match[1];
+}
+
+function usernameFromMessagesURL(url) {
+	var match = url.match(/\/?[Mm]essages\/([A-z0-9\.]{5,})/);
+	if (match)
+		return match[1];
 }
 
 function userIdFromMessagesURL(url) {
-	return url.substring(url.lastIndexOf('/') + 1);
+	var match = url.match(/\/?[Mm]essages\/([0-9]+)/);
+	if (match)
+		return match[1];
 }
 
 function fadeTextTo(node, text) {
