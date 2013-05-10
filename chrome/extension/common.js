@@ -99,14 +99,15 @@ function fetchUsedNicknames() {
 			var preNicknameList = decodeFromHexRecursive(response);
 			var preNicknameMapForId = nicknameMapFromList(preNicknameList, 'target');
 			var uids = [];
-			for (var i in preNicknameList)
-				uids.push(preNicknameList[i].target);
+			fastForEach(preNicknameList, function(elm) {
+				uids.push(elm.target);
+			});
 			fetchFacebookDataFromIds({userIds: uids}, function(fbResponse) {
 				if(fbResponse.data)
-					for (var i in fbResponse.data) {
-						preNicknameMapForId[fbResponse.data[i].uid].username = fbResponse.data[i].username;
-						preNicknameMapForId[fbResponse.data[i].uid].name = fbResponse.data[i].name;
-					}
+					fastForEach(fbResponse.data, function(elm) {
+						preNicknameMapForId[elm.uid].username = elm.username;
+						preNicknameMapForId[elm.uid].name = elm.name;
+					});
 				nicknameList = removeUselessNicknames(preNicknameList);
 				nicknameMap = nicknameMapFromList(nicknameList, 'username');
 				nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
@@ -124,7 +125,7 @@ function fetchFacebookDataFromIds(request, callback) {
 
 function removeUselessNicknames(list) {
 	var retArr = [];
-	fastForEach(list, function(elm, i) {
+	fastForEach(list, function(elm) {
 		if (elm.username && elm.name != elm.alias)
 			retArr.push(elm);
 	});
