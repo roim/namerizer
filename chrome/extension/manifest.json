@@ -12,7 +12,7 @@
 
   "permissions": [
     "*://*.facebook.com/*",
-    "http://namerizer.herokuapp.com/*"
+    "http://fbnamerizer.appspot.com/*"
   ],
   
   "background": {

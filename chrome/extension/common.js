@@ -86,7 +86,7 @@ function fetchUsedNicknames() {
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage(new UserNicknamesParameters(currentUserId), function(response) {
-			var preNicknameList = response;
+			var preNicknameList = JSON.parse(response);
 			var prenicknameMapForId = nickNameMapFromList(preNicknameList, 'target');
 			var uids = [];
 			fastForEach(preNicknameList, function(elm) {

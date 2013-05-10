@@ -12,7 +12,7 @@ function fetchCommonNicknames(data, callback) {
 			commonNicknames = parsedJSON;
 	}
 	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
-			var nicknames = commonNicknamesFromResponse(response);
+			var nicknames = JSON.parse(response);
 			if (!arrayEquals(commonNicknames[data.userId], nicknames)) {
 				commonNicknames[data.userId] = nicknames;
 				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
@@ -21,15 +21,6 @@ function fetchCommonNicknames(data, callback) {
 				}
 			}
 	});
-}
-
-function commonNicknamesFromResponse(response) {
-	var nicknames = [];
-	if (typeof response === "undefined") return nicknames;
-	for (var i = 0; i < response.length; i++) {
-		nicknames.push(response[i][0]);
-	}
-	return nicknames;
 }
 
 // Front front end

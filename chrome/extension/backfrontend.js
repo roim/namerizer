@@ -35,7 +35,7 @@ function processMessage(request, sender, sendResponse) {
 			request.alias, 
 			request.name, 
 			request.username);
-		$.post(baseServiceAddress + "/addNewNickname", JSON.stringify(requestBody));
+		$.post(baseServiceAddress + "/addNewNickname", JSON.stringify(requestBody), sendResponse);
 		return true;
 	} else if (request.code === 'facebookData') {
 		var uids = "";
