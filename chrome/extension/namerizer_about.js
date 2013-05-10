@@ -90,13 +90,14 @@ function createCommonNicknames() {
 	
 	$(aboutContent).attr('namerized', 'true');
 	var $info = $($(aboutContent).find('ul')[0]);
-	var imgUrl = chrome.extension.getURL("images/commonNicknamesIcon.png");
-	var $elm = $('<div class="clearfix" />').appendTo($('<li class="_4_uf" id="namerizer_nicknames"/>').appendTo($info));
-	$elm.append('<img class="_s0 _51iw _29h _29i _54rv img" width="16" height="16" alt="" src="' + imgUrl + '"/>');
+	var $elm = $info.children().last().clone().attr('id', 'namerizer_nicknames');
+	$elm.find('img').attr('src', chrome.extension.getURL("images/commonNicknamesIcon.png"));
+	$elm.find('li').text('Common nicknames: ');
 	$commonNicknamesSpan = $('<span/>').appendTo(
-		$('<li class="_4_ug"/>').appendTo($('<ul class="uiList _4_vp _29j _29k _513w _4kg"/>').appendTo($elm)).text('Common nicknames: ')
+		$elm.find('li').text('Common nicknames: ')
 	).text('-');
-		
+	$info.append($elm);
+
 	if (!commonNicknames[currentProfileUsername]) {
 		var target = nicknameMap[currentProfileUsername];
 		if (target)
