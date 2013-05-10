@@ -4,17 +4,17 @@ function fetchCommonNicknames(data, callback) {
 	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
 	if (persistentJson) {
 		var parsedJSON = JSON.parse(persistentJson);
-		if (parsedJSON[data.username] && !commonNicknames[data.username] && callback) {
-			commonNicknames[data.username] = parsedJSON[data.username];
-			callback(parsedJSON[data.username], 'cache');
+		if (parsedJSON[data.userId] && !commonNicknames[data.userId] && callback) {
+			commonNicknames[data.userId] = parsedJSON[data.userId];
+			callback(parsedJSON[data.userId], 'cache');
 		}
 		if (!arrayEquals(commonNicknames, parsedJSON))
 			commonNicknames = parsedJSON;
 	}
 	chrome.runtime.sendMessage({code: "commonNicknames", userId: data.userId}, function(response) {
 			var nicknames = commonNicknamesFromResponse(response);
-			if (!arrayEquals(commonNicknames[data.username], nicknames)) {
-				commonNicknames[data.username] = nicknames;
+			if (!arrayEquals(commonNicknames[data.userId], nicknames)) {
+				commonNicknames[data.userId] = nicknames;
 				GM_setValue(cacheKeys.commonNicknamesForUser, JSON.stringify(commonNicknames));
 				if (callback) {
 					callback(nicknames, 'server');
@@ -98,15 +98,16 @@ function createCommonNicknames() {
 	).text('-');
 	$info.append($elm);
 
-	if (!commonNicknames[currentProfileUsername]) {
-		var target = nicknameMap[currentProfileUsername];
+	var profileOwnerId = findProfileOwnerId();
+	if (!commonNicknames[profileOwnerId]) {
+		var target = nicknameMapForId[profileOwnerId];
 		if (target)
-			commonNicknames[currentProfileUsername] = [target.alias];
+			commonNicknames[profileOwnerId] = [target.alias];
 	}
-	if (commonNicknames[currentProfileUsername])
-		updateCommonNicknamesSpan(commonNicknames[currentProfileUsername]);
+	if (commonNicknames[profileOwnerId])
+		updateCommonNicknamesSpan(commonNicknames[profileOwnerId]);
 
-	fetchCommonNicknames({userId: findProfileOwnerId(), username: currentProfileUsername}, function(response, origin) {
+	fetchCommonNicknames({userId: profileOwnerId}, function(response, origin) {
 		if (origin == 'cache') {
 			updateCommonNicknamesSpan(response);
 		}

@@ -7,7 +7,7 @@ var cacheKeys = {
 	};
 
 // Globals
-var nicknameMap = {};
+var nicknameMapForUsername = {};
 var nicknameMapForId = {};
 var nicknameList = {};
 
@@ -76,15 +76,15 @@ function fetchUsedNicknames() {
 	var persistentJson = GM_getValue(cacheKeys.userNicknames);
 	if (persistentJson) {
 		nicknameList = JSON.parse(persistentJson);
-		nicknameMap = nicknameMapFromList(nicknameList, 'username');
-		nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
+		nicknameMapForUsername = nickNameMapFromList(nicknameList, 'username');
+		nicknameMapForId = nickNameMapFromList(nicknameList, 'target');
 		switchNames();
 	}
 	
 	if (currentUserId && currentUserId != -1) {
 		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
 			var preNicknameList = decodeFromHexRecursive(response);
-			var preNicknameMapForId = nicknameMapFromList(preNicknameList, 'target');
+			var prenicknameMapForId = nickNameMapFromList(preNicknameList, 'target');
 			var uids = [];
 			fastForEach(preNicknameList, function(elm) {
 				uids.push(elm.target);
@@ -92,12 +92,12 @@ function fetchUsedNicknames() {
 			fetchFacebookDataFromIds({userIds: uids}, function(fbResponse) {
 				if(fbResponse.data)
 					fastForEach(fbResponse.data, function(elm) {
-						preNicknameMapForId[elm.uid].username = elm.username;
-						preNicknameMapForId[elm.uid].name = elm.name;
+						prenicknameMapForId[elm.uid].username = elm.username;
+						prenicknameMapForId[elm.uid].name = elm.name;
 					});
 				nicknameList = removeUselessNicknames(preNicknameList);
-				nicknameMap = nicknameMapFromList(nicknameList, 'username');
-				nicknameMapForId = nicknameMapFromList(nicknameList, 'target');
+				nicknameMapForUsername = nickNameMapFromList(nicknameList, 'username');
+				nicknameMapForId = nickNameMapFromList(nicknameList, 'target');
 				GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 				switchNames();
 			});
@@ -113,13 +113,13 @@ function fetchFacebookDataFromIds(request, callback) {
 function removeUselessNicknames(list) {
 	var retArr = [];
 	fastForEach(list, function(elm) {
-		if (elm.username && elm.name != elm.alias)
+		if (elm.target && elm.name != elm.alias)
 			retArr.push(elm);
 	});
 	return retArr;
 }
 
-function nicknameMapFromList(list, key) {
+function nickNameMapFromList(list, key) {
 	var map = {};
 	fastForEach(list, function(elm) {
 		if (elm && key in elm)
@@ -194,11 +194,11 @@ function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
 }
 
 function targetFromURL(url) {
-	if (target = nicknameMap[usernameFromURL(url)])
+	if (target = nicknameMapForUsername[usernameFromURL(url)])
 		return target;
 	if (target = nicknameMapForId[userIdFromMessagesURL(url)])
 		return target;
-	if (target = nicknameMap[usernameFromMessagesURL(url)])
+	if (target = nicknameMapForUsername[usernameFromMessagesURL(url)])
 		return target;
 	if (target = nicknameMapForId[userIdFromURL(url)])
 		return target;
@@ -207,7 +207,7 @@ function targetFromURL(url) {
 function usernameFromURL(url) {
 	var match = /[^\/]\/{1}([A-z0-9\.]{5,})/.exec(url);
 	if (match)
-		return match[1];
+		return match[1] != "profile.php" ? match[1] : userIdFromURL(url);
 }
 
 function userIdFromURL(url) {

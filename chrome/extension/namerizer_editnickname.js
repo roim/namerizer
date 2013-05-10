@@ -1,7 +1,7 @@
 var $editNicknamesButton;
 
 function sendNicknameToServer(data, callback) {
-	var target = nicknameMap[data.username];
+	var target = nicknameMapForId[data.target];
 	if (target) {
 		$('a[namerized="true"]').each(function(i, node) {
 			var href = $(node).attr('href');
@@ -14,7 +14,7 @@ function sendNicknameToServer(data, callback) {
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		switchNames();
 	} else {
-		target = nicknameMap[data.username] = data;
+		target = nicknameMapForId[data.target] = nicknameMap[data.username] = data;
 		nicknameList.push(target);
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		switchNames();
@@ -46,7 +46,7 @@ function selectText(element) {
 
 function editNickname() {
 	var $profileName = $('#fbProfileCover .cover div a');
-	var target = nicknameMap[usernameFromURL($profileName.attr('href'))];
+	var target = targetFromURL($profileName.attr('href'));
 	var $clone = $profileName.clone().removeAttr('href').wrap('<div contentEditable="true"/>');
 	var $editNicknameDiv = $clone.parent();
 	$editNicknameDiv.keypress(function(e) {
