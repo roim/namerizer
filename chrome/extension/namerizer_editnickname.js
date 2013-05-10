@@ -14,7 +14,7 @@ function sendNicknameToServer(params, callback) {
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		switchNames();
 	} else {
-		target = nicknameMapForId[params.target] = nicknameMap[params.username] = params;
+		target = nicknameMapForId[params.target] = nicknameMapForUsername[params.username] = params;
 		nicknameList.push(target);
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		switchNames();
