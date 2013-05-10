@@ -27,6 +27,48 @@ function configureNodeAnimation(parentNode, whereToReplace, name, alias) {
 	});
 }
 
+function deconfigureNodeAnimation(parentNode) {
+	$(parentNode).off('mouseenter');
+	$(parentNode).off('mouseleave');
+}
+
+function unswitchNames(target) {
+	var unswithedNodes = [];
+	$('a[namerized="true"]').each(function(i, node) {
+		var nodeTarget = targetFromURL($(node).attr('href'));
+		if ((!target || nodeTarget === target) && nodeTarget) {
+			findElementsDirectlyContainingText(node, nodeTarget.alias).forEach(function(elm) {
+				$(elm).html(replaceOnStringExcluding($(elm).html(), nodeTarget.alias, nodeTarget.name, nodeTarget.name));
+			});
+			$(node).removeAttr('namerized');
+			deconfigureNodeAnimation(node);
+			unswithedNodes.push(node);
+		}
+	});
+	return unswithedNodes;
+}
+
+function updateNames(newNicknameMapForId) {
+	$('a[namerized="true"]').each(function(i, node) {
+		var oldTarget = targetFromURL($(node).attr('href'));
+		if (!oldTarget)
+			return;
+		var newTarget = newNicknameMapForId[oldTarget.target];
+		if (!newTarget) {
+			findElementsDirectlyContainingText(node, oldTarget.alias).forEach(function(elm) {
+				$(elm).html(replaceOnStringExcluding($(elm).html(), oldTarget.alias, oldTarget.name, oldTarget.name));
+			});
+			$(node).removeAttr('namerized');
+			deconfigureNodeAnimation(node);
+		} else if (oldTarget.alias != newTarget.alias) {
+			findElementsDirectlyContainingText(node, oldTarget.alias).forEach(function(elm) {
+				$(elm).html(replaceOnStringExcluding($(elm).html(), nodeTarget.alias, newTarget.alias, newTarget.alias));
+			});
+		}
+	});
+	return newNicknameMapForId; // just see where this function is used to see why we return the argument (fetchUsedNicknames)
+}
+
 function replaceName(parentNode, target) {
 	if(!target || $(parentNode).attr('namerized') === 'false' ||
 		($(parentNode).attr('namerized') === 'true' 
@@ -37,7 +79,7 @@ function replaceName(parentNode, target) {
 	if (whereToReplace.length == 0)
 		return false;
 	whereToReplace.forEach(function(node) {
-		$(node).html($(node).html().replace(target.name, target.alias));
+		$(node).html(replaceOnStringExcluding($(node).html(), target.name, target.alias, target.alias));
 	});
 	if (!$(parentNode).attr('namerized')) {
 		$(parentNode).attr('namerized', 'true');
@@ -45,7 +87,6 @@ function replaceName(parentNode, target) {
 	}
 	return true;
 }
-
 
 function switchNames(links) {
 	if (!links)

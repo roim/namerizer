@@ -2,23 +2,15 @@ var $editNicknamesButton;
 
 function sendNicknameToServer(params, callback) {
 	var target = nicknameMapForId[params.target];
+	var unswitchedNodes;
 	if (target) {
-		$('a[namerized="true"]').each(function(i, node) {
-			var href = $(node).attr('href');
-			if (targetFromURL(href) === target) {
-				$(node).html(replaceOnStringExcluding($(node).html(), target.alias, target.name, target.name));
-				$(node).removeAttr('namerized');
-			}
-		});
+		unswitchedNodes = unswitchNames(target);
 		target.alias = params.alias;
-		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
-		switchNames();
 	} else {
 		target = nicknameMapForId[params.target] = nicknameMapForUsername[params.username] = params;
 		nicknameList.push(target);
-		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
-		switchNames();
 	}
+	switchNames(unswitchedNodes); // if it's undefined the function will just search on every anchor
 
 	chrome.runtime.sendMessage(params, function(response) {
 		if (callback)

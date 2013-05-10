@@ -73,12 +73,14 @@ parseCurrentUserId();
 // talking to back front end
 
 function fetchUsedNicknames() {
-	var persistentJson = GM_getValue(cacheKeys.userNicknames);
-	if (persistentJson) {
-		nicknameList = JSON.parse(persistentJson);
-		nicknameMapForUsername = nickNameMapFromList(nicknameList, 'username');
-		nicknameMapForId = nickNameMapFromList(nicknameList, 'target');
-		switchNames();
+	if (!nicknameList) {
+		var persistentJson = GM_getValue(cacheKeys.userNicknames);
+		if (persistentJson) {
+			nicknameList = JSON.parse(persistentJson);
+			nicknameMapForId = nickNameMapFromList(nicknameList, 'target');
+			nicknameMapForUsername = nickNameMapFromList(nicknameList, 'username');
+			switchNames();
+		}
 	}
 	
 	if (currentUserId && currentUserId != -1) {
@@ -96,8 +98,8 @@ function fetchUsedNicknames() {
 						prenicknameMapForId[elm.uid].name = elm.name;
 					});
 				nicknameList = removeUselessNicknames(preNicknameList);
+				nicknameMapForId = updateNames(nickNameMapFromList(nicknameList, 'target')); // function returns the argument itself, did this not to have to create a temp variable
 				nicknameMapForUsername = nickNameMapFromList(nicknameList, 'username');
-				nicknameMapForId = nickNameMapFromList(nicknameList, 'target');
 				GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 				switchNames();
 			});
