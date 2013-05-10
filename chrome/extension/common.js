@@ -82,14 +82,14 @@ function fetchUsedNicknames() {
 	}
 	
 	if (currentUserId && currentUserId != -1) {
-		chrome.runtime.sendMessage({code: "userNicknames", userId: currentUserId}, function(response) {
+		chrome.runtime.sendMessage(new UserNicknamesParameters(currentUserId), function(response) {
 			var preNicknameList = decodeFromHexRecursive(response);
 			var prenicknameMapForId = nickNameMapFromList(preNicknameList, 'target');
 			var uids = [];
 			fastForEach(preNicknameList, function(elm) {
 				uids.push(elm.target);
 			});
-			fetchFacebookDataFromIds({userIds: uids}, function(fbResponse) {
+			fetchFacebookDataFromIds(new FacebookDataParameters(uids), function(fbResponse) {
 				if(fbResponse.data)
 					fastForEach(fbResponse.data, function(elm) {
 						prenicknameMapForId[elm.uid].username = elm.username;
@@ -106,7 +106,6 @@ function fetchUsedNicknames() {
 }
 
 function fetchFacebookDataFromIds(request, callback) {
-	request.code = 'facebookData';
 	chrome.runtime.sendMessage(request, callback);
 }
 

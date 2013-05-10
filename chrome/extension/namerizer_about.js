@@ -39,19 +39,19 @@ function anchorFromAlias(alias) {
 
 	return $('<a class="profileLink" data-hover="tooltip" aria-label="Use this nickname" data-tooltip-alignh="center"/>').text(alias).click(function() {
 		var $profileName = $('#fbProfileCover .cover div a');
+		var target = targetFromURL($profileName.attr('href'));
 		var alternateName = $profileName.find('.alternate_name');
-		var target = nicknameMap[usernameFromURL($profileName.attr('href'))];
-		sendNicknameToServer({
-			source: currentUserId, 
-			target: findProfileOwnerId(), 
-			alias: alias,
-			name: 
-				target ? target.name : (
-					alternateName ? 
-						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : 
-						$profileName.text()),
-			username: currentProfileUsername
-		});
+		var name = target ? target.name : (
+					alternateName ?
+						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : // remove alternate name then trim
+						$profileName.text());
+		sendNicknameToServer(new SendNicknameParameters(
+			currentUserId,          // source
+			findProfileOwnerId(),   // target
+			alias,                  // alias
+			name,                   // name
+			currentProfileUsername  // username
+		));
 	});
 }
 

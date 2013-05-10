@@ -47,7 +47,7 @@ function processMessage(request, sender, sendResponse) {
 			for (var i = 0; i < request.userIds.length; i++)
 				uids += ",+" + request.userIds[i];
 		uids = uids.substring(2);
-		$.get(graphBaseServiceAddress + "/fql?q=SELECT+name,+username,+uid+FROM+user+WHERE+uid+IN+(" + uids + ")", sendResponse);
+		$.get(graphBaseServiceAddress + "/fql?q=SELECT+name,username,uid+FROM+user+WHERE+uid+IN+(" + uids + ")", sendResponse);
 		return true;
 	}
 	return false;

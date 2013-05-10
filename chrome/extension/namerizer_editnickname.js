@@ -1,7 +1,7 @@
 var $editNicknamesButton;
 
-function sendNicknameToServer(data, callback) {
-	var target = nicknameMapForId[data.target];
+function sendNicknameToServer(params, callback) {
+	var target = nicknameMapForId[params.target];
 	if (target) {
 		$('a[namerized="true"]').each(function(i, node) {
 			var href = $(node).attr('href');
@@ -10,18 +10,17 @@ function sendNicknameToServer(data, callback) {
 				$(node).removeAttr('namerized');
 			}
 		});
-		target.alias = data.alias;
+		target.alias = params.alias;
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		switchNames();
 	} else {
-		target = nicknameMapForId[data.target] = nicknameMap[data.username] = data;
+		target = nicknameMapForId[params.target] = nicknameMap[params.username] = params;
 		nicknameList.push(target);
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));
 		switchNames();
 	}
 
-	data.code = "sendNickname";
-	chrome.runtime.sendMessage(data, function(response) {
+	chrome.runtime.sendMessage(params, function(response) {
 		if (callback)
 			callback(response);
 		fetchUsedNicknames();
@@ -54,17 +53,17 @@ function editNickname() {
 			$editNicknameDiv.remove();
 			$profileName.show();
 			var alternateName = $profileName.find('.alternate_name');
-			sendNicknameToServer({
-				source: currentUserId, 
-				target: findProfileOwnerId(), 
-				alias: $editNicknameDiv.text(),
-				name: 
-					target ? target.name : (
-						alternateName ? 
-							$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : 
-							$profileName.text()),
-				username: currentProfileUsername
-			});
+			var name = target ? target.name : (
+					alternateName ?
+						$profileName.text().replace(alternateName.text(), '').replace(/^\s+|\s+$/g, '') : // remove alternate name then trim
+						$profileName.text());
+			sendNicknameToServer(new SendNicknameParameters(
+				currentUserId,          // source
+				findProfileOwnerId(),   // target
+				$editNicknameDiv.text(),// alias
+				name,                   // name
+				currentProfileUsername  // username
+			));
 			return false;
 		}
 	});
