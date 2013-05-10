@@ -5,11 +5,10 @@ function sendNicknameToServer(data, callback) {
 	if (target) {
 		$('a[namerized="true"]').each(function(i, node) {
 			var href = $(node).attr('href');
-			if (usernameFromURL(href) === target.username || userIdFromMessagesURL(href) == target.target) {
+			if (targetFromURL(href) === target) {
 				$(node).html(replaceOnStringExcluding($(node).html(), target.alias, target.name, target.name));
 				$(node).removeAttr('namerized');
 			}
-
 		});
 		target.alias = data.alias;
 		GM_setValue(cacheKeys.userNicknames, JSON.stringify(nicknameList));

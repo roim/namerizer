@@ -4,7 +4,7 @@ function fetchCommonNicknames(data, callback) {
 	var persistentJson = GM_getValue(cacheKeys.commonNicknamesForUser);
 	if (persistentJson) {
 		var parsedJSON = JSON.parse(persistentJson);
-		if (!arrayEquals(commonNicknames[data.username], parsedJSON[data.username]) && callback) {
+		if (parsedJSON[data.username] && !commonNicknames[data.username] && callback) {
 			commonNicknames[data.username] = parsedJSON[data.username];
 			callback(parsedJSON[data.username], 'cache');
 		}
@@ -55,7 +55,7 @@ function anchorFromAlias(alias) {
 	});
 }
 
-function updatecommonNicknamesSpan(nicknameList) {
+function updateCommonNicknamesSpan(nicknameList) {
 	if (!nicknameList.length) {
 		$commonNicknamesSpan.text('-');
 		return;
@@ -103,14 +103,14 @@ function createCommonNicknames() {
 			commonNicknames[currentProfileUsername] = [target.alias];
 	}
 	if (commonNicknames[currentProfileUsername])
-		updatecommonNicknamesSpan(commonNicknames[currentProfileUsername]);
+		updateCommonNicknamesSpan(commonNicknames[currentProfileUsername]);
 
 	fetchCommonNicknames({userId: findProfileOwnerId(), username: currentProfileUsername}, function(response, origin) {
 		if (origin == 'cache') {
-			updatecommonNicknamesSpan(response);
+			updateCommonNicknamesSpan(response);
 		}
 		else {
-			animateApplyFunction($commonNicknamesSpan, function() {updatecommonNicknamesSpan(response)});
+			animateApplyFunction($commonNicknamesSpan, function() {updateCommonNicknamesSpan(response)});
 		}
 	});
 }

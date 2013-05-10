@@ -209,34 +209,34 @@ function replaceOnStringExcluding(where, what, towhat, notWhenIn) {
 function targetFromURL(url) {
 	if (target = nicknameMap[usernameFromURL(url)])
 		return target;
-	if (target = nicknameMapForId[userIdFromURL(url)])
-		return target;
 	if (target = nicknameMapForId[userIdFromMessagesURL(url)])
 		return target;
 	if (target = nicknameMap[usernameFromMessagesURL(url)])
 		return target;
+	if (target = nicknameMapForId[userIdFromURL(url)])
+		return target;
 }
 
 function usernameFromURL(url) {
-	var match = url.match(/[^\/]\/{1}([A-z0-9\.]{5,})/);
+	var match = /[^\/]\/{1}([A-z0-9\.]{5,})/.exec(url);
 	if (match)
 		return match[1];
 }
 
 function userIdFromURL(url) {
-	var match = url.match(/id=([0-9]+)/);
+	var match = /id=([0-9]+)/.exec(url);
 	if (match)
 		return match[1];
 }
 
 function usernameFromMessagesURL(url) {
-	var match = url.match(/\/?[Mm]essages\/([A-z0-9\.]{5,})/);
+	var match = /\/?[Mm]essages\/([A-z0-9\.]{5,})/.exec(url);
 	if (match)
 		return match[1];
 }
 
 function userIdFromMessagesURL(url) {
-	var match = url.match(/\/?[Mm]essages\/([0-9]+)/);
+	var match = /\/?[Mm]essages\/([0-9]+)/.exec(url);
 	if (match)
 		return match[1];
 }
