@@ -54,32 +54,19 @@ function fastForEach(collection, callback, forThis) {
 
 // finding current user ID
 function parseCurrentUserId() {
-	if ($("html").html().length < 300) {
+	var match = /"user"\s*:\s*"([0-9]+)"/.exec(document.head ? document.head.innerHTML : null);
+	if (match)
+		currentUserId = match[1];
+	if (!currentUserId) {
 		setTimeout(parseCurrentUserId, 100);
 		return;
 	}
-	
-	var beginOfHtml = $("html").html().substring(0, 300);
-	if (beginOfHtml[7] == 'm') {
-		var begin = beginOfHtml.indexOf("user") + 7;
-		var end = beginOfHtml.indexOf('",');
-
-		if (begin != -1 && end != -1) {
-			var userIdString = beginOfHtml.substring(begin, end);
-			currentUserId = userIdString;
-		}
+	if (GM_getValue(cacheKeys.currentUserId) != currentUserId) {
+		for (i in cacheKeys)
+			GM_deleteValue(cacheKeys[i]);
+		GM_setValue(cacheKeys.currentUserId, currentUserId);
 	}
-	if (!currentUserId) {
-		currentUserId = -1;
-	} else {		
-		if (GM_getValue(cacheKeys.currentUserId) != currentUserId) {
-			for (i in cacheKeys) {
-				GM_deleteValue(cacheKeys[i]);
-			}
-			GM_setValue(cacheKeys.currentUserId, currentUserId);
-		}
-		fetchUsedNicknames();
-	}
+	fetchUsedNicknames();
 }
 parseCurrentUserId();
 
