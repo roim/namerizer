@@ -70,7 +70,7 @@ function updateNames(newNicknameMapForId) {
 }
 
 function replaceName(parentNode, target) {
-	if(!target || $(parentNode).attr('namerized') === 'false' ||
+	if(!target || $(parentNode).attr('namerized') === 'false' || target.alias == target.name ||
 		($(parentNode).attr('namerized') === 'true' 
 			&& ($(parentNode).html().indexOf(target.name) === -1 || target.alias.indexOf(target.name) !== -1)) ) {
 		return false;
