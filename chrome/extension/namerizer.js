@@ -37,9 +37,7 @@ function replaceName(parentNode, target) {
 	if (whereToReplace.length == 0)
 		return false;
 	whereToReplace.forEach(function(node) {
-		if ($(node).text().indexOf(target.name) !== -1) {
-			$(node).text($(node).text().replace(target.name, target.alias));
-		}
+		$(node).text($(node).text().replace(target.name, target.alias));
 	});
 	if (!$(parentNode).attr('namerized')) {
 		$(parentNode).attr('namerized', 'true');
