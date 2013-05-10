@@ -17,7 +17,11 @@ function SendNicknameParameters(source, target, alias, name, username) {
 	this.target = target;
 	this.alias = alias;
 	this.name = name;
-	this.username = username;	
+	this.username = username;
+
+	this.toNicknameEntry = function() {
+		return {source: this.source, target: this.target, alias: this.alias, name : this.name, username: this.username};
+	}
 }
 
 function FacebookDataParameters(userIds) {

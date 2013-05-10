@@ -34,13 +34,14 @@ function deconfigureNodeAnimation(parentNode) {
 
 function unswitchNames(target) {
 	var unswithedNodes = [];
-	$('a[namerized="true"]').each(function(i, node) {
-		var nodeTarget = targetFromURL($(node).attr('href'));
+	$('[namerized="true' + (target ? '"][namerizer_userId="' + target.target : '') + '"]').each(function(i, node) {
+		var nodeTarget = nicknameMapForId[$(node).attr('namerizer_userid')];
 		if ((!target || nodeTarget === target) && nodeTarget) {
 			findElementsDirectlyContainingText(node, nodeTarget.alias).forEach(function(elm) {
 				$(elm).html(replaceOnStringExcluding($(elm).html(), nodeTarget.alias, nodeTarget.name, nodeTarget.name));
 			});
 			$(node).removeAttr('namerized');
+			$(node).removeAttr('namerizer_userid');
 			deconfigureNodeAnimation(node);
 			unswithedNodes.push(node);
 		}
@@ -49,8 +50,8 @@ function unswitchNames(target) {
 }
 
 function updateNames(newNicknameMapForId) {
-	$('a[namerized="true"]').each(function(i, node) {
-		var oldTarget = targetFromURL($(node).attr('href'));
+	$('[namerized="true"]').each(function(i, node) {
+		var oldTarget = nicknameMapForId[$(node).attr('namerizer_userid')];
 		if (!oldTarget)
 			return;
 		var newTarget = newNicknameMapForId[oldTarget.target];
@@ -62,7 +63,7 @@ function updateNames(newNicknameMapForId) {
 			deconfigureNodeAnimation(node);
 		} else if (oldTarget.alias != newTarget.alias) {
 			findElementsDirectlyContainingText(node, oldTarget.alias).forEach(function(elm) {
-				$(elm).html(replaceOnStringExcluding($(elm).html(), nodeTarget.alias, newTarget.alias, newTarget.alias));
+				$(elm).html(replaceOnStringExcluding($(elm).html(), oldTarget.alias, newTarget.alias, newTarget.alias));
 			});
 		}
 	});
@@ -83,6 +84,7 @@ function replaceName(parentNode, target) {
 	});
 	if (!$(parentNode).attr('namerized')) {
 		$(parentNode).attr('namerized', 'true');
+		$(parentNode).attr('namerizer_userid', target.target);
 		configureNodeAnimation(parentNode, whereToReplace, target.name, target.alias);
 	}
 	return true;
@@ -92,9 +94,16 @@ function switchNames(links) {
 	if (!links)
 		links = $('a');
 	fastForEach(links, function(elm) {
-		var href = elm.href;
+		var href = $(elm).attr('href');
 		if (!href) {
 		  return;
+		}
+
+		if ($(elm).hasClass('titlebarText')) {
+			var collapsedChatTab = $(elm).parents('.fbNub').find('.fbNubButton');
+			if (collapsedChatTab.length) {
+				replaceName(collapsedChatTab[0], targetFromURL(href));
+			}
 		}
 		replaceName(elm, targetFromURL(href));
 	});

@@ -7,8 +7,7 @@ function sendNicknameToServer(params, callback) {
 		unswitchedNodes = unswitchNames(target);
 		target.alias = params.alias;
 	} else {
-		target = nicknameMapForId[params.target] = nicknameMapForUsername[params.username] = params;
-		nicknameList.push(target);
+		target = nicknameMapForId[params.target] = nicknameMapForUsername[params.username] = params.toNicknameEntry();
 	}
 	switchNames(unswitchedNodes); // if it's undefined the function will just search on every anchor
 
