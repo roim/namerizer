@@ -74,7 +74,7 @@ parseCurrentUserId();
 // talking to back front end
 
 function fetchUsedNicknames() {
-	if (!nicknameList) {
+	if (!Object.keys(nicknameList).length) {
 		var persistentJson = GM_getValue(cacheKeys.userNicknames);
 		if (persistentJson) {
 			nicknameList = JSON.parse(persistentJson);
