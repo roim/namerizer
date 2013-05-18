@@ -10,18 +10,18 @@ function findElementsDirectlyContainingText(ancestor, text) {
 	return array;
 }
 
-function configureNodeAnimation(parentNode, whereToReplace, name, alias) {
+function configureNodeAnimation(parentNode, name, alias) {
 	$(parentNode).on('mouseenter', function(event) {
 		if ($.contains(parentNode, event.fromElement)) return;
 		$(parentNode).attr('namerized', 'false');
-		whereToReplace.forEach(function(node) {
+		findElementsDirectlyContainingText(parentNode, alias).forEach(function(node) {
 			fadeReplaceInText(node, alias, name);
 		});
 	});
 	$(parentNode).on('mouseleave', function(event) {
 		if ($.contains(parentNode, event.toElement)) return;
 		$(parentNode).attr('namerized', 'true');
-		whereToReplace.forEach(function(node) {
+		findElementsDirectlyContainingText(parentNode, name).forEach(function(node) {
 			fadeReplaceInText(node, name, alias);
 		});
 	});
@@ -85,7 +85,7 @@ function replaceName(parentNode, target) {
 	if (!$(parentNode).attr('namerized')) {
 		$(parentNode).attr('namerized', 'true');
 		$(parentNode).attr('namerizer_userid', target.target);
-		configureNodeAnimation(parentNode, whereToReplace, target.name, target.alias);
+		configureNodeAnimation(parentNode, target.name, target.alias);
 	}
 	return true;
 }
