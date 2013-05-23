@@ -33,7 +33,7 @@ function deconfigureNodeAnimation(parentNode) {
 }
 
 function unswitchNames(target) {
-	var unswithedNodes = [];
+	var unswitchedNodes = [];
 	$('[namerized="true' + (target ? '"][namerizer_userId="' + target.target : '') + '"]').each(function(i, node) {
 		var nodeTarget = nicknameMapForId[$(node).attr('namerizer_userid')];
 		if ((!target || nodeTarget === target) && nodeTarget) {
@@ -43,10 +43,10 @@ function unswitchNames(target) {
 			$(node).removeAttr('namerized');
 			$(node).removeAttr('namerizer_userid');
 			deconfigureNodeAnimation(node);
-			unswithedNodes.push(node);
+			unswitchedNodes.push(node);
 		}
 	});
-	return unswithedNodes;
+	return unswitchedNodes;
 }
 
 function updateNames(newNicknameMapForId) {
@@ -109,6 +109,16 @@ function switchNames(links) {
 	});
 }
 
+function switchSidebar(links) {
+	if (!links) return;
+	fastForEach(links, function(elm) {
+		names = $(elm).find("span[class=passiveName]");
+		if (names.length) {
+			replaceName(names[0], nicknameMapForId[$(elm).attr('data-actor')]);
+		}
+	})
+}
+
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 var observer = new MutationObserver(function(mutations) {
@@ -119,9 +129,15 @@ var observer = new MutationObserver(function(mutations) {
 				if ($(node).prop('tagName') === 'A') {
 					switchNames([node]);
 				}
+				
+				switchSidebar($(node).find('div[data-actor]')); 
+				if ($(node).prop('tagName') === 'A' && $(node).attr('data-actor') !== undefined) {
+					switchSidebar([node]);
+				}
+				
 			});
 			// this checks the node that has been modified, we will only try to switch names on it if its already namerized or we don't care :)
-			// also, when the user hovers we change the text as well, but we change the namerized attribute to false so we won't try to swith it back either
+			// also, when the user hovers we change the text as well, but we change the namerized attribute to false so we won't try to switch it back either
 			if ($(mutation.target).prop('tagName') === 'A') {
 				switchNames([mutation.target]);
 			}
