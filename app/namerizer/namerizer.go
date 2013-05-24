@@ -72,7 +72,7 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	//
 	if r.Method != "POST" {
-		http.Error(w, "403 method forbidden", 400)
+		http.Error(w, "403 method forbidden", 403)
 		return
 	}
 
