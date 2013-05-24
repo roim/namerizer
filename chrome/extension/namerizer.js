@@ -131,7 +131,7 @@ var observer = new MutationObserver(function(mutations) {
 				}
 				
 				switchSidebar($(node).find('div[data-actor]')); 
-				if ($(node).prop('tagName') === 'A' && $(node).attr('data-actor') !== undefined) {
+				if ($(node).prop('tagName') === 'div' && $(node).attr('data-actor') !== undefined) {
 					switchSidebar([node]);
 				}
 				
