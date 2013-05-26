@@ -116,6 +116,17 @@ function switchSidebar(links) {
 		if (names.length) {
 			replaceName(names[0], nicknameMapForId[$(elm).attr('data-actor')]);
 		}
+
+		// parse source ID from ajax data
+		// this should probably be replaced to be less reliant on formatting, if possible
+		var data = decodeURI($(elm).attr("data-ajaxify"));
+		var ids = data.substring( data.search("\\[source_id\\]") + 12);
+		ids = ids.split("&");
+
+		names = $(elm).find("span[class=token]");
+		if (names.length && ids.length) {
+			replaceName(names[0], nicknameMapForId[ids[0]]);
+		}
 	})
 }
 
