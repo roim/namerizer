@@ -130,6 +130,29 @@ function switchSidebar(links) {
 	})
 }
 
+function switchNotification(links) {
+	if (!links) return;
+	fastForEach(links, function(elm) {
+		// I have to parse the JSON manually because order is not guaranteed
+		// but I need order to keep IDs and names paired correctly
+		var data = $(elm).attr('data-gt');
+		if (!data) return;
+
+		var ids = data.substring( data.search('"from_uids":{') + 13);
+		ids = ids.split('}')[0];
+
+		ids = ids.split(',');
+		for (i = 0; i < ids.length; i++) {
+			ids[i] = ids[i].split(':')[0].slice(1, -1);
+		}
+
+		var names = $(elm).find('span[class=blueName]');
+		for (i = 0; i < Math.min(names.length, ids.length); i++) {
+			replaceName(names[i], nicknameMapForId[ids[i]]);
+		}
+	})
+}
+
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 var observer = new MutationObserver(function(mutations) {
@@ -144,6 +167,10 @@ var observer = new MutationObserver(function(mutations) {
 				switchSidebar($(node).find('div[data-actor]')); 
 				if ($(node).prop('tagName') === 'DIV' && $(node).attr('data-actor') !== undefined) {
 					switchSidebar([node]);
+				}
+
+				if ($(node).prop('tagName') === 'LI' && $(node).attr('class') === 'notification') {
+					switchNotification([node]);
 				}
 				
 			});
