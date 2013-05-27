@@ -72,7 +72,7 @@ func addNewNickname(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	//
 	if r.Method != "POST" {
-		http.Error(w, "404 wrong HTTP method?", 404)
+		http.Error(w, "405 HTTP method not allowed", 405)
 		return
 	}
 
@@ -137,7 +137,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	//
 	if r.Method != "GET" {
-		http.Error(w, "404 wrong HTTP method?", 404)
+		http.Error(w, "405 HTTP method not allowed", 405)
 		return
 	}
 
@@ -179,7 +179,7 @@ func getSuggestions(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	//
 	if r.Method != "GET" {
-		http.Error(w, "404 wrong HTTP method?", 404)
+		http.Error(w, "405 HTTP method not allowed", 405)
 		return
 	}
 
