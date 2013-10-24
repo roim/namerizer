@@ -1,7 +1,9 @@
 Namerizer
 =========
 
-Change the name of your facebook contacts!
+Change the name of your facebook contacts! 
+
+Our chrome extension is available at: http://chrome.google.com/webstore/detail/namerizer/hpciladepbpfoobjnmngnhfbaoofgejh
 
 Namerizer is composed of a chrome extension and a web service.
 
