@@ -157,7 +157,7 @@ func getNicknamesForUser(w http.ResponseWriter, r *http.Request) {
 	results := make([]Nickname, 0, 3000)
 
 	if _, err := q.GetAll(c, &results); err != nil {
-		http.Error(w, "500 failure querying the databse", 500)
+		http.Error(w, "500 failure querying the database", 500)
 		c.Errorf(err.Error())
 		return
 	}
